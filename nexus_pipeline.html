@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pipeline de Leads — NEXUS</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:       #F8F9FC;
+    --navy-mid:   #FFFFFF;
+    --navy-light: #F1F3F8;
+    --navy-card:  #FFFFFF;
+    --accent:     #9A6B2E;
+    --accent-dim: rgba(154,107,46,0.1);
+    --white:      #1A1D2E;
+    --white-70:   rgba(26,29,46,0.7);
+    --white-40:   rgba(26,29,46,0.45);
+    --white-15:   rgba(26,29,46,0.1);
+    --white-08:   rgba(26,29,46,0.05);
+
+    /* Temperaturas */
+    --t1-bg: rgba(100,120,200,0.1);  --t1-border: rgba(100,120,200,0.3);  --t1-text: #3B5BC4;
+    --t2-bg: rgba(20,150,100,0.1);   --t2-border: rgba(20,150,100,0.3);   --t2-text: #0E7A55;
+    --t3-bg: rgba(180,120,0,0.1);    --t3-border: rgba(180,120,0,0.3);    --t3-text: #9A6800;
+    --t4-bg: rgba(200,50,30,0.1);    --t4-border: rgba(200,50,30,0.3);    --t4-text: #C03020;
+
+    /* Etapas */
+    --s0: #9CA3AF; --s1: #4F6FCC; --s2: #D97706; --s3: #16A34A; --s4: #9A6B2E;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: #F4F6FA;
+    color: #1A1D2E;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  .topbar {
+    background: #FFFFFF;
+    box-shadow: 0 1px 0 #E2E6EF;
+    border-bottom: 1px solid var(--white-15);
+    padding: 0 2rem;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .logo {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .logo-icon {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, #C8A96E, #A07840);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px; color: var(--navy);
+    letter-spacing: -0.5px;
+  }
+  .logo-text { font-size: 16px; font-weight: 600; letter-spacing: 0.08em; color: #1A1D2E; }
+  .logo-sub  { font-size: 11px; color: #9A6B2E; letter-spacing: 0.12em; text-transform: uppercase; }
+
+  .topbar-actions { display: flex; gap: 10px; align-items: center; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 16px; border-radius: 6px;
+    font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 500;
+    cursor: pointer; border: none; transition: all 0.2s;
+  }
+  .btn-ghost {
+    background: #F3F4F6; color: #374151;
+    border: 1px solid #D1D5DB;
+  }
+  .btn-ghost:hover { background: #E5E7EB; color: #111827; }
+  .btn-accent {
+    background: linear-gradient(135deg, #C8A96E, #A07840);
+    color: var(--navy); font-weight: 600;
+  }
+  .btn-accent:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-danger { background: rgba(220,60,60,0.2); color: #F07070; border: 1px solid rgba(220,60,60,0.3); }
+  .btn-danger:hover { background: rgba(220,60,60,0.3); }
+
+  /* ── MAIN ── */
+  .main { padding: 2rem; max-width: 1600px; margin: 0 auto; }
+
+  /* ── STATS STRIP ── */
+  .stats-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 2rem;
+  }
+  .stat-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E6EF;
+    border-radius: 10px;
+    padding: 14px 16px;
+    transition: border-color 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .stat-card:hover { border-color: var(--white-40); }
+  .stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--white-40); margin-bottom: 6px; }
+  .stat-num   { font-size: 26px; font-weight: 600; color: #1A1D2E; line-height: 1; }
+  .stat-card.s-frio  .stat-num { color: var(--t1-text); }
+  .stat-card.s-morno   .stat-num { color: var(--t2-text); }
+  .stat-card.s-quente  .stat-num { color: var(--t3-text); }
+  .stat-card.s-urgente .stat-num { color: var(--t4-text); }
+
+  /* ── TOOLBAR ── */
+  .toolbar {
+    display: flex; gap: 10px; align-items: center;
+    margin-bottom: 1.5rem; flex-wrap: wrap;
+  }
+  .search-wrap {
+    flex: 1; min-width: 200px; position: relative;
+  }
+  .search-wrap input {
+    width: 100%; background: #FFFFFF;
+    border: 1px solid var(--white-15); border-radius: 6px;
+    padding: 8px 12px 8px 36px;
+    color: var(--white); font-family: 'Outfit', sans-serif; font-size: 13px;
+  }
+  .search-wrap input::placeholder { color: var(--white-40); }
+  .search-wrap input:focus { outline: none; border-color: var(--accent); }
+  .search-icon {
+    position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+    color: var(--white-40); font-size: 14px; pointer-events: none;
+  }
+  .filter-btn {
+    background: #FFFFFF; border: 1px solid #D1D5DB;
+    color: #4B5563; padding: 8px 14px; border-radius: 6px;
+    font-family: 'Outfit', sans-serif; font-size: 12px; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .filter-btn:hover, .filter-btn.active { border-color: #C8A96E; color: #9A6B2E; background: #FDF4E7; }
+
+  /* ── PIPELINE MAP ── */
+  .pipeline-label {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em;
+    color: #9CA3AF; margin-bottom: 1rem;
+  }
+
+  .pipeline {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0;
+    background: #FFFFFF;
+    border: 1px solid #E2E6EF;
+    border-radius: 12px;
+    overflow: visible;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+    align-items: start;
+  }
+
+  .stage-col {
+    border-right: 1px solid #E2E6EF;
+    min-height: 500px;
+    display: flex; flex-direction: column;
+    overflow: visible;
+  }
+  .stage-col:first-child { border-radius: 12px 0 0 12px; }
+  .stage-col:last-child  { border-right: none; border-radius: 0 12px 12px 0; }
+
+  .stage-head {
+    padding: 12px 12px 10px;
+    border-bottom: 2px solid #E5E7EB;
+    background: #FFFFFF;
+    min-height: 58px;
+    display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .stage-head-top {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .stage-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    display: inline-block; margin-right: 5px;
+    flex-shrink: 0; margin-top: 2px;
+  }
+  .stage-name { font-size: 11px; font-weight: 600; letter-spacing: 0.03em; line-height: 1.3; }
+  .stage-head-top > div:first-child { display: flex; align-items: flex-start; }
+  .stage-count {
+    font-size: 10px; font-weight: 600;
+    background: #E5E7EB; color: #6B7280;
+    padding: 2px 7px; border-radius: 20px;
+  }
+  .stage-bar {
+    height: 3px; border-radius: 2px;
+    background: #E5E7EB; overflow: hidden;
+    flex-shrink: 0;
+  }
+  .stage-bar-fill { height: 100%; border-radius: 2px; transition: width 0.4s; }
+
+  .stage-body { padding: 10px; flex: 1; overflow: visible; }
+
+  /* Etapa cores */
+  .col-0 .stage-head { border-bottom-color: var(--s0); }
+  .col-0 .stage-dot  { background: var(--s0); }
+  .col-0 .stage-name { color: #6B7280; }
+  .col-0 .stage-bar-fill { background: var(--s0); }
+
+  .col-1 .stage-head { border-bottom-color: var(--s1); }
+  .col-1 .stage-dot  { background: var(--s1); }
+  .col-1 .stage-name { color: #4F6FCC; }
+  .col-1 .stage-bar-fill { background: var(--s1); }
+
+  .col-2 .stage-head { border-bottom-color: var(--s2); }
+  .col-2 .stage-dot  { background: var(--s2); }
+  .col-2 .stage-name { color: #D97706; }
+  .col-2 .stage-bar-fill { background: var(--s2); }
+
+  .col-3 .stage-head { border-bottom-color: var(--s3); }
+  .col-3 .stage-dot  { background: var(--s3); }
+  .col-3 .stage-name { color: #16A34A; }
+  .col-3 .stage-bar-fill { background: var(--s3); }
+
+  .col-4 .stage-head { border-bottom-color: var(--s4); }
+  .col-4 .stage-dot  { background: var(--s4); }
+  .col-4 .stage-name { color: #9A6B2E; }
+  .col-4 .stage-bar-fill { background: var(--s4); }
+
+  /* ── LEAD CARD ── */
+  .lead-card {
+    background: #FFFFFF;
+    border: 1px solid var(--white-15);
+    border-radius: 8px;
+    padding: 11px 12px 11px 15px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.18s;
+    position: relative;
+    overflow: visible;
+  }
+  .lead-card::before {
+    content: '';
+    position: absolute; left: 0; top: 4px; bottom: 4px;
+    width: 3px;
+    border-radius: 3px;
+  }
+  .lead-card.t-frio::before    { background: var(--t1-text); }
+  .lead-card.t-morno::before   { background: var(--t2-text); }
+  .lead-card.t-quente::before  { background: var(--t3-text); }
+  .lead-card.t-urgente::before { background: var(--t4-text); }
+
+  .lead-card:hover {
+    border-color: var(--white-40);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+
+  .lead-name { font-size: 12px; font-weight: 600; color: var(--white); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; display: block; }
+  .lead-phone { font-size: 11px; color: #6B7280; margin-bottom: 7px; }
+  .lead-footer { display: flex; align-items: center; justify-content: space-between; }
+
+  .temp-pill {
+    font-size: 9px; font-weight: 600; letter-spacing: 0.06em;
+    text-transform: uppercase; padding: 2px 7px; border-radius: 20px;
+  }
+  .temp-pill.t-frio  { background: var(--t1-bg); border: 1px solid var(--t1-border); color: var(--t1-text); }
+  .temp-pill.t-morno   { background: var(--t2-bg); border: 1px solid var(--t2-border); color: var(--t2-text); }
+  .temp-pill.t-quente  { background: var(--t3-bg); border: 1px solid var(--t3-border); color: var(--t3-text); }
+  .temp-pill.t-urgente { background: var(--t4-bg); border: 1px solid var(--t4-border); color: var(--t4-text); }
+
+  .lead-date { font-size: 10px; color: #9CA3AF; }
+  .lead-followup {
+    font-size: 10px; font-weight: 500; color: #5ED4AA;
+    margin-top: 4px; letter-spacing: 0.02em;
+  }
+  .lead-followup.overdue { color: #F07060; }
+  .lead-source {
+    font-size: 9px; color: rgba(255,255,255,0.35);
+    letter-spacing: 0.03em; margin-top: 3px;
+  }
+  .lead-product {
+    margin-top: 6px; padding-top: 6px;
+    border-top: 1px solid var(--white-15);
+    font-size: 10px; color: var(--accent);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    letter-spacing: 0.03em;
+  }
+
+  /* ── ADD BTN inside column ── */
+  .add-card-btn {
+    width: 100%; background: transparent;
+    border: 1px dashed #D1D5DB;
+    border-radius: 8px; padding: 8px;
+    color: #9CA3AF; font-size: 12px;
+    font-family: 'Outfit', sans-serif;
+    cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 5px;
+    margin-top: 4px;
+  }
+  .add-card-btn:hover { border-color: #C8A96E; color: #9A6B2E; background: #FDF4E7; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(7,11,48,0.85);
+    backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 200; padding: 1rem;
+  }
+  .modal {
+    background: #FFFFFF;
+    border: 1px solid var(--white-15);
+    border-radius: 14px;
+    padding: 1.75rem;
+    width: 100%; max-width: 420px;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+  }
+  .modal-title {
+    font-size: 17px; font-weight: 600; color: var(--white);
+    margin-bottom: 1.25rem;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .modal-title span { color: var(--accent); }
+
+  .form-row { margin-bottom: 14px; }
+  .form-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--white-40); margin-bottom: 5px; display: block; }
+  .form-input, .form-select, .form-textarea {
+    width: 100%;
+    background: #F9FAFB; border: 1px solid #D1D5DB;
+    border-radius: 6px; padding: 9px 12px;
+    color: var(--white); font-family: 'Outfit', sans-serif; font-size: 13px;
+    transition: border-color 0.2s;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus {
+    outline: none; border-color: var(--accent);
+  }
+  .form-input::placeholder, .form-textarea::placeholder { color: var(--white-40); }
+  .form-select option { background: var(--navy-mid); }
+  .form-textarea { resize: vertical; min-height: 70px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .modal-footer { display: flex; gap: 8px; justify-content: flex-end; margin-top: 1.5rem; }
+
+  /* Detail modal */
+  .detail-section { margin-bottom: 14px; }
+  .detail-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #9CA3AF; margin-bottom: 4px; }
+  .detail-value { font-size: 13px; color: #1A1D2E; }
+  .detail-obs { background: #F9FAFB; border-radius: 6px; padding: 10px 12px; font-size: 12px; color: #4B5563; line-height: 1.5; min-height: 40px; }
+  .wa-link { color: #5ED4AA; text-decoration: none; font-size: 12px; }
+  .wa-link:hover { text-decoration: underline; }
+
+  /* ── LEGEND ── */
+  .legend {
+    display: flex; gap: 20px; flex-wrap: wrap;
+    margin-bottom: 1.25rem; align-items: center;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #4B5563; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center; padding: 2rem 1rem; color: #9CA3AF;
+  }
+  .empty-state svg { margin-bottom: 8px; opacity: 0.3; }
+  .empty-state p { font-size: 12px; line-height: 1.5; }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed; bottom: 2rem; right: 2rem;
+    background: #FFFFFF; border: 1px solid #E2E6EF;
+    border-left: 3px solid #C8A96E;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border-radius: 8px; padding: 12px 16px;
+    font-size: 13px; color: var(--white);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    z-index: 999; opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  @media print { .topbar, .toolbar, .add-card-btn, .topbar-actions { display: none !important; } }
+
+  /* ── LIGHT THEME OVERRIDE ── */
+  :root {
+    --navy:       #F0F2F7;
+    --navy-mid:   #FFFFFF;
+    --navy-light: #F5F7FC;
+    --navy-card:  #FFFFFF;
+    --accent:     #9A6B2E;
+    --accent-dim: rgba(154,107,46,0.1);
+    --white:      #111827;
+    --white-70:   #374151;
+    --white-40:   #6B7280;
+    --white-15:   #E5E7EB;
+    --white-08:   #F3F4F6;
+    --t1-bg: #EEF2FF; --t1-border: #C7D2FE; --t1-text: #3730A3;
+    --t2-bg: #ECFDF5; --t2-border: #A7F3D0; --t2-text: #065F46;
+    --t3-bg: #FFFBEB; --t3-border: #FCD34D; --t3-text: #92400E;
+    --t4-bg: #FEF2F2; --t4-border: #FECACA; --t4-text: #991B1B;
+    --s0: #9CA3AF; --s1: #4F6FCC; --s2: #D97706; --s3: #16A34A; --s4: #9A6B2E;
+  }
+  body { background: #F0F2F7 !important; color: #111827 !important; }
+  .topbar { background: #FFFFFF !important; border-bottom: 1px solid #E5E7EB !important; box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important; }
+  .logo-text { color: #111827 !important; }
+  .logo-sub { color: #9A6B2E !important; }
+  .btn-ghost { background: #F9FAFB !important; color: #374151 !important; border: 1px solid #D1D5DB !important; }
+  .btn-ghost:hover { background: #F3F4F6 !important; color: #111827 !important; }
+  .btn-accent { background: linear-gradient(135deg,#C8A96E,#A07840) !important; color: #fff !important; }
+  .stat-card { background: #FFFFFF !important; border: 1px solid #E5E7EB !important; box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important; }
+  .stat-label { color: #6B7280 !important; }
+  .stat-num { color: #111827 !important; }
+  .stat-card.hot .stat-num { color: #991B1B !important; }
+  .stat-card.warm .stat-num { color: #92400E !important; }
+  .stat-card.cold .stat-num { color: #3730A3 !important; }
+  .search-wrap input { background: #FFFFFF !important; border: 1px solid #D1D5DB !important; color: #111827 !important; }
+  .search-wrap input::placeholder { color: #9CA3AF !important; }
+  .search-icon { color: #9CA3AF !important; }
+  .filter-btn { background: #FFFFFF !important; border: 1px solid #D1D5DB !important; color: #374151 !important; }
+  .filter-btn:hover, .filter-btn.active { background: #FDF4E7 !important; border-color: #C8A96E !important; color: #9A6B2E !important; }
+  .legend-item { color: #4B5563 !important; }
+  .pipeline-label { color: #9CA3AF !important; }
+  .pipeline { background: #FFFFFF !important; border: 1px solid #E5E7EB !important; box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important; }
+  .stage-col { border-right: 1px solid #E5E7EB !important; }
+  .stage-head { background: #FFFFFF !important; border-bottom: 2px solid #E5E7EB !important; }
+  .col-0 .stage-head { border-bottom-color: #9CA3AF !important; }
+  .col-1 .stage-head { border-bottom-color: #4F6FCC !important; }
+  .col-2 .stage-head { border-bottom-color: #D97706 !important; }
+  .col-3 .stage-head { border-bottom-color: #16A34A !important; }
+  .col-4 .stage-head { border-bottom-color: #9A6B2E !important; }
+  .col-0 .stage-name { color: #6B7280 !important; }
+  .col-1 .stage-name { color: #4F6FCC !important; }
+  .col-2 .stage-name { color: #D97706 !important; }
+  .col-3 .stage-name { color: #16A34A !important; }
+  .col-4 .stage-name { color: #9A6B2E !important; }
+  .stage-count { background: #F3F4F6 !important; color: #6B7280 !important; }
+  .stage-bar { background: #E5E7EB !important; }
+  .stage-body { background: #FAFBFD !important; }
+  .lead-card { background: #FFFFFF !important; border: 1px solid #E5E7EB !important; }
+  .lead-card:hover { border-color: #C8A96E !important; box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important; }
+  .lead-name { color: #111827 !important; }
+  .lead-phone { color: #6B7280 !important; }
+  .lead-date { color: #9CA3AF !important; }
+  .lead-product { color: #9A6B2E !important; border-top: 1px solid #E5E7EB !important; }
+  .lead-source { color: #9CA3AF !important; }
+  .lead-followup { color: #065F46 !important; }
+  .lead-followup.overdue { color: #991B1B !important; }
+  .add-card-btn { border: 1px dashed #D1D5DB !important; color: #9CA3AF !important; }
+  .add-card-btn:hover { border-color: #C8A96E !important; color: #9A6B2E !important; background: #FDF4E7 !important; }
+  .empty-state { color: #9CA3AF !important; }
+  .modal-overlay { background: rgba(17,24,39,0.4) !important; }
+  .modal { background: #FFFFFF !important; border: 1px solid #E5E7EB !important; box-shadow: 0 20px 60px rgba(0,0,0,0.15) !important; }
+  .modal-title { color: #111827 !important; }
+  .form-label { color: #6B7280 !important; }
+  .form-input, .form-select, .form-textarea { background: #F9FAFB !important; border: 1px solid #D1D5DB !important; color: #111827 !important; }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: #C8A96E !important; }
+  .detail-label { color: #9CA3AF !important; }
+  .detail-value { color: #111827 !important; }
+  .detail-obs { background: #F9FAFB !important; color: #374151 !important; }
+  .wa-link { color: #065F46 !important; }
+  .btn-cancel { background: #F9FAFB !important; border: 1px solid #D1D5DB !important; color: #374151 !important; }
+  .btn-sm { background: #F9FAFB !important; border: 1px solid #D1D5DB !important; color: #374151 !important; }
+  .btn-sm:hover { background: #F3F4F6 !important; }
+  .btn-del { color: #991B1B !important; border-color: #FECACA !important; background: #FEF2F2 !important; }
+  .toast { background: #FFFFFF !important; border: 1px solid #E5E7EB !important; border-left: 3px solid #C8A96E !important; color: #111827 !important; box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important; }
+
+
+  /* ══════════════════════════════════
+     MOBILE RESPONSIVE
+     ══════════════════════════════════ */
+  @media (max-width: 768px) {
+
+    /* Header */
+    .topbar {
+      height: auto !important;
+      padding: 10px 14px !important;
+      flex-wrap: wrap !important;
+      gap: 8px !important;
+    }
+    .logo-icon { width: 28px !important; height: 28px !important; font-size: 12px !important; }
+    .logo-text { font-size: 14px !important; }
+    .logo-sub  { font-size: 9px !important; }
+    .topbar-actions { width: 100% !important; justify-content: stretch !important; }
+    .topbar-actions .btn { flex: 1 !important; justify-content: center !important; font-size: 12px !important; padding: 6px 8px !important; height: 34px !important; }
+
+    /* Main padding */
+    .main { padding: 12px !important; }
+
+    /* Stats */
+    .stats-strip {
+      grid-template-columns: repeat(3, 1fr) !important;
+      gap: 8px !important;
+      margin-bottom: 14px !important;
+    }
+    .stat-card { padding: 8px 6px !important; }
+    .stat-label { font-size: 9px !important; }
+    .stat-num { font-size: 20px !important; }
+
+    /* Toolbar */
+    .toolbar { gap: 6px !important; margin-bottom: 12px !important; }
+    .search-wrap { min-width: 100% !important; order: -1; }
+    .search-wrap input { font-size: 14px !important; }
+    .filter-btn { font-size: 11px !important; padding: 5px 10px !important; }
+
+    /* Legend */
+    .legend { gap: 8px 14px !important; margin-bottom: 10px !important; }
+    .legend-item { font-size: 10px !important; }
+
+    /* Pipeline label */
+    .pipeline-label { font-size: 9px !important; margin-bottom: 10px !important; }
+
+    /* Pipeline — muda de colunas para lista de acordeão */
+    .pipeline {
+      display: flex !important;
+      flex-direction: column !important;
+      border-radius: 10px !important;
+      overflow: hidden !important;
+    }
+
+    .stage-col {
+      border-right: none !important;
+      border-bottom: 1px solid #E5E7EB !important;
+      min-height: auto !important;
+    }
+    .stage-col:last-child { border-bottom: none !important; }
+    .stage-col:first-child { border-radius: 10px 10px 0 0 !important; }
+    .stage-col:last-child  { border-radius: 0 0 10px 10px !important; }
+
+    /* Stage head clicável para expandir/recolher */
+    .stage-head {
+      cursor: pointer !important;
+      padding: 12px 14px !important;
+      position: relative !important;
+    }
+    .stage-head::after {
+      content: '▾';
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      color: #9CA3AF;
+      transition: transform 0.2s;
+    }
+    .stage-col.collapsed .stage-head::after { transform: translateY(-50%) rotate(-90deg) !important; }
+
+    /* Stage body colapsável */
+    .stage-body {
+      padding: 8px !important;
+      overflow: hidden !important;
+      transition: max-height 0.25s ease !important;
+    }
+    .stage-col.collapsed .stage-body {
+      max-height: 0 !important;
+      padding: 0 8px !important;
+    }
+
+    /* Cards no mobile — full width */
+    .lead-card {
+      margin-bottom: 8px !important;
+    }
+    .lead-name { font-size: 13px !important; }
+    .lead-phone { font-size: 12px !important; }
+
+    /* Add card btn */
+    .add-card-btn { font-size: 12px !important; padding: 10px !important; }
+
+    /* Modal */
+    .modal-overlay { align-items: flex-end !important; padding: 0 !important; }
+    .modal {
+      width: 100% !important;
+      max-width: 100% !important;
+      border-radius: 16px 16px 0 0 !important;
+      padding: 1.25rem 1rem 2rem !important;
+      max-height: 90vh !important;
+      overflow-y: auto !important;
+    }
+    .form-grid { grid-template-columns: 1fr !important; gap: 0 !important; }
+  }
+
+  @media (max-width: 480px) {
+    .stats-strip { grid-template-columns: repeat(2, 1fr) !important; }
+  }
+
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="logo">
+    <div class="logo-icon">NX</div>
+    <div>
+      <div class="logo-text">NEXUS</div>
+      <div class="logo-sub">Pipeline de Leads</div>
+    </div>
+  </div>
+  <div class="topbar-actions">
+    <button class="btn btn-ghost" onclick="openAdd()">+ Novo lead</button>
+    <button class="btn btn-ghost" onclick="exportPDF()">⬇ Exportar PDF</button>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- STATS -->
+  <div class="stats-strip" id="stats-strip"></div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input type="text" id="search" placeholder="Buscar por nome ou telefone..." oninput="render()">
+    </div>
+    <button class="filter-btn active" data-filter="" onclick="setFilter(this, '')">Todos</button>
+    <button class="filter-btn" data-filter="frio"  onclick="setFilter(this,'frio')">❄ Frio</button>
+    <button class="filter-btn" data-filter="morno"   onclick="setFilter(this,'morno')">🌿 Morno</button>
+    <button class="filter-btn" data-filter="quente"  onclick="setFilter(this,'quente')">🔥 Quente</button>
+    <button class="filter-btn" data-filter="urgente" onclick="setFilter(this,'urgente')">⚡ Urgente</button>
+    <button class="filter-btn" id="btn-followup-filter" onclick="toggleFollowupFilter(this)">📅 Follow-up</button>
+  </div>
+
+  <!-- LEGEND -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--t1-text)"></div> Frio — sem engajamento</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--t2-text)"></div> Morno — potencial real</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--t3-text)"></div> Quente — interesse claro</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--t4-text)"></div> Urgente — fechar agora</div>
+  </div>
+
+  <!-- PIPELINE -->
+  <p class="pipeline-label">Mapa do pipeline · <span id="pipeline-count">0</span> leads ativos</p>
+  <div class="pipeline" id="pipeline"></div>
+
+</main>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- MODALS via JS -->
+
+<script>
+// ── CONFIG ──
+function parseLocalDate(str) {
+  if (!str) return null;
+  const [y, m, d] = str.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
+const STAGES = [
+  { id: 0, key: 'sem-interesse',   label: 'Sem Interesse',   icon: '○' },
+  { id: 1, key: 'aguardando',     label: 'Aguardando Retorno',     icon: '◔' },
+  { id: 2, key: 'sem-retorno',      label: 'Sem Retorno',    icon: '◑' },
+  { id: 3, key: 'em-negociacao',  label: 'Em Negociação',  icon: '◕' },
+  { id: 4, key: 'contrato-fechado',    label: 'Contrato Fechado',    icon: '●' },
+];
+const TEMPS = [
+  { id: 'frio',  label: 'Frio',  icon: '❄' },
+  { id: 'morno',   label: 'Morno',   icon: '🌿' },
+  { id: 'quente',  label: 'Quente',  icon: '🔥' },
+  { id: 'urgente', label: 'Urgente', icon: '⚡' },
+];
+
+const SOURCES = [
+  'Post Instagram',
+  'Link Instagram',
+  'Indicação',
+  'Tabela NEXUS',
+  'Contatos do WhatsApp',
+];
+
+const PRODUCTS = [
+  'Mentoria NEXUS',
+  'Curso Avançado',
+  'Alinhadores',
+  'DOP',
+  'FOC',
+  'Mini-Implantes',
+  'Discussões de Casos ao Vivo',
+  'Grupo da Comunidade',
+  'Combo',
+  'Outros',
+];
+
+// ── SUPABASE via fetch direto ──
+const SUPA_URL = 'https://yvinuubwaxrqhlzkayes.supabase.co';
+const SUPA_KEY = 'sb_publishable_cpWid2g_fGNOCrGGAp5Ylw_asLdsrNX';
+const SUPA_HEADERS = {
+  'apikey': SUPA_KEY,
+  'Authorization': 'Bearer ' + SUPA_KEY,
+  'Content-Type': 'application/json',
+  'Prefer': 'return=representation',
+  'X-Client-Info': 'supabase-js/2.0.0',
+};
+
+// Helper: build URL with apikey param
+function supaUrl(table, params='') {
+  return `${SUPA_URL}/rest/v1/${table}?apikey=${SUPA_KEY}${params ? '&'+params : ''}`;
+}
+
+const _supa = {
+  from: (table) => ({
+    select: (cols='*') => ({
+      order: (col, opts={}) => fetch(
+        supaUrl(table, `select=${cols}&order=${col}.${opts.ascending===false?'desc':'asc'}`),
+        { headers: SUPA_HEADERS }
+      ).then(r => r.json()).then(data => Array.isArray(data) ? {data, error:null} : {data:null, error:data}),
+    }),
+    insert: (rows) => ({
+      select: () => ({
+        single: () => fetch(
+          supaUrl(table),
+          { method:'POST', headers: {...SUPA_HEADERS, 'Prefer':'return=representation'}, body: JSON.stringify(rows[0]) }
+        ).then(r => r.json()).then(data => Array.isArray(data) ? {data:data[0], error:null} : {data:null, error:data}),
+      }),
+    }),
+    update: (obj) => ({
+      eq: (col, val) => fetch(
+        supaUrl(table, `${col}=eq.${val}`),
+        { method:'PATCH', headers: SUPA_HEADERS, body: JSON.stringify(obj) }
+      ).then(r => r.ok ? {error:null} : r.json().then(e => ({error:e}))),
+    }),
+    delete: () => ({
+      eq: (col, val) => fetch(
+        supaUrl(table, `${col}=eq.${val}`),
+        { method:'DELETE', headers: SUPA_HEADERS }
+      ).then(r => r.ok ? {error:null} : r.json().then(e => ({error:e}))),
+    }),
+  }),
+};
+
+// ── STATE ──
+let leads = [];
+let activeFilter = '';
+let followupOnly = false;
+let editingId = null;
+
+async function loadLeads() {
+  // Show loading indicator
+  document.getElementById('pipeline-count').textContent = 'carregando...';
+  try {
+    const { data, error } = await _supa
+      .from('pipeline_leads')
+      .select('*')
+      .order('created_at', { ascending: true });
+    
+    if (error) {
+      console.error('load error', error);
+      toast('Erro ao carregar: ' + error.message);
+      document.getElementById('pipeline-count').textContent = 'erro';
+      return;
+    }
+    
+    leads = (data || []).map(r => ({
+      id: r.id, name: r.name, phone: r.phone, temp: r.temp,
+      stage: r.stage, product: r.product, source: r.source,
+      followup: r.followup, obs: r.obs, date: r.date,
+    }));
+    render();
+  } catch(e) {
+    console.error('fetch error', e);
+    toast('Erro de conexão: ' + e.message);
+  }
+}
+
+async function insertLead(d) {
+  const { data: row, error } = await _supa.from('pipeline_leads')
+    .insert([{ name:d.name, phone:d.phone, temp:d.temp, stage:d.stage,
+                product:d.product, source:d.source, followup:d.followup,
+                obs:d.obs, date:d.date }]).select().single();
+  if (error) { console.error('insert error', error); return null; }
+  return row;
+}
+
+async function updateLead(id, d) {
+  const { error } = await _supa.from('pipeline_leads')
+    .update({ name:d.name, phone:d.phone, temp:d.temp, stage:d.stage,
+               product:d.product, source:d.source, followup:d.followup,
+               obs:d.obs, date:d.date }).eq('id', id);
+  if (error) console.error('update error', error);
+}
+
+async function deleteLeadDB(id) {
+  const { error } = await _supa.from('pipeline_leads').delete().eq('id', id);
+  if (error) console.error('delete error', error);
+}
+
+function save() { /* no-op — Supabase handles persistence */ }
+
+// ── FILTER ──
+function toggleFollowupFilter(el) {
+  followupOnly = !followupOnly;
+  el.classList.toggle('active', followupOnly);
+  render();
+}
+
+function setFilter(el, val) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  activeFilter = val;
+  render();
+}
+
+function getFiltered() {
+  const q = document.getElementById('search').value.toLowerCase();
+  return leads.filter(l => {
+    if (activeFilter && l.temp !== activeFilter) return false;
+    if (q && !l.name.toLowerCase().includes(q) && !(l.phone||'').includes(q)) return false;
+    if (followupOnly && !l.followup) return false;
+    return true;
+  });
+}
+
+// ── RENDER ──
+function render() {
+  const fl = getFiltered();
+  renderStats(fl);
+  renderPipeline(fl);
+  document.getElementById('pipeline-count').textContent = fl.length;
+}
+
+function renderStats(fl) {
+  const total = fl.length;
+  const byTemp = {};
+  TEMPS.forEach(t => byTemp[t.id] = fl.filter(l => l.temp === t.id).length);
+  const conv = fl.filter(l => l.stage === 4).length;
+
+  document.getElementById('stats-strip').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Total de Leads</div>
+      <div class="stat-num">${total}</div>
+    </div>
+    <div class="stat-card s-frio">
+      <div class="stat-label">❄ Frios</div>
+      <div class="stat-num">${byTemp.frio||0}</div>
+    </div>
+    <div class="stat-card s-morno">
+      <div class="stat-label">🌿 Mornos</div>
+      <div class="stat-num">${byTemp.morno||0}</div>
+    </div>
+    <div class="stat-card s-quente">
+      <div class="stat-label">🔥 Quentes</div>
+      <div class="stat-num">${byTemp.quente||0}</div>
+    </div>
+    <div class="stat-card s-urgente">
+      <div class="stat-label">⚡ Urgentes</div>
+      <div class="stat-num">${byTemp.urgente||0}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">✅ Vendas Feitas</div>
+      <div class="stat-num" style="color:var(--accent)">${conv}</div>
+    </div>
+  `;
+}
+
+function renderPipeline(fl) {
+  const container = document.getElementById('pipeline');
+  container.innerHTML = '';
+  const totalLeads = fl.length || 1;
+
+  STAGES.forEach((st, idx) => {
+    const group = fl.filter(l => l.stage === st.id);
+    const pct = Math.round((group.length / totalLeads) * 100);
+
+    const col = document.createElement('div');
+    col.className = `stage-col col-${idx}`;
+
+    let cardsHTML = group.length === 0
+      ? `<div class="empty-state"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M8 12h8M12 8v8"/></svg><p>Nenhum lead<br>nesta etapa</p></div>`
+      : group.map(l => cardHTML(l)).join('');
+
+    col.innerHTML = `
+      <div class="stage-head">
+        <div class="stage-head-top">
+          <div><span class="stage-dot"></span><span class="stage-name">${st.label}</span></div>
+          <span class="stage-count">${group.length}</span>
+        </div>
+        <div class="stage-bar"><div class="stage-bar-fill" style="width:${pct}%"></div></div>
+      </div>
+      <div class="stage-body">
+        ${cardsHTML}
+        <button class="add-card-btn" onclick="openAdd(${st.id})">+ Adicionar lead</button>
+      </div>
+    `;
+    container.appendChild(col);
+  });
+
+  // bind click events
+  container.querySelectorAll('.lead-card').forEach(el => {
+    el.addEventListener('click', () => viewLead(parseInt(el.dataset.id)));
+  });
+}
+
+function cardHTML(l) {
+  const tl = TEMPS.find(t => t.id === l.temp);
+  return `
+    <div class="lead-card t-${l.temp}" data-id="${l.id}">
+      <div class="lead-name">${l.name}</div>
+      <div class="lead-phone">${l.phone || '—'}</div>
+      <div class="lead-footer">
+        <span class="temp-pill t-${l.temp}">${tl?.icon} ${tl?.label}</span>
+        <span class="lead-date">${l.date||''}</span>
+      </div>
+      ${l.product ? `<div class="lead-product">${l.product}</div>` : ''}
+      ${l.source ? `<div class="lead-source">↳ ${l.source}</div>` : ''}
+      ${l.followup ? (() => {
+        const d = parseLocalDate(l.followup); const today = new Date(); today.setHours(0,0,0,0);
+        const overdue = d < today;
+        const label = d.toLocaleDateString('pt-BR');
+        return `<div class="lead-followup ${overdue ? 'overdue' : ''}">📅 Follow-up: ${label}</div>`;
+      })() : ''}
+    </div>
+  `;
+}
+
+// ── ADD / EDIT MODAL ──
+function openAdd(stageId = 0) {
+  editingId = null;
+  showFormModal({ name:'', phone:'', temp:'morno', stage: stageId, product:'', source:'', followup:'', obs:'' });
+}
+
+function showFormModal(data) {
+  const title = editingId ? 'Editar lead' : 'Novo lead';
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.id = 'form-overlay';
+  overlay.innerHTML = `
+    <div class="modal">
+      <div class="modal-title">✦ <span>${title}</span></div>
+      <div class="form-row">
+        <label class="form-label">Nome</label>
+        <input class="form-input" id="f-name" value="${data.name}" placeholder="Dra. Nome Sobrenome">
+      </div>
+      <div class="form-row">
+        <label class="form-label">Telefone / WhatsApp</label>
+        <input class="form-input" id="f-phone" value="${data.phone||''}" placeholder="(XX) 9XXXX-XXXX">
+      </div>
+      <div class="form-grid">
+        <div class="form-row">
+          <label class="form-label">Temperatura</label>
+          <select class="form-select" id="f-temp">
+            ${TEMPS.map(t => `<option value="${t.id}" ${data.temp===t.id?'selected':''}>${t.icon} ${t.label}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-row">
+          <label class="form-label">Etapa</label>
+          <select class="form-select" id="f-stage">
+            ${STAGES.map(s => `<option value="${s.id}" ${data.stage===s.id?'selected':''}>${s.label}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">Interesse em</label>
+        <select class="form-select" id="f-product">
+          <option value="">— Selecione o produto —</option>
+          ${PRODUCTS.map(p => `<option value="${p}" ${data.product===p?'selected':''}>${p}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-row">
+        <label class="form-label">Como chegou até você</label>
+        <select class="form-select" id="f-source">
+          <option value="">— Selecione a origem —</option>
+          ${SOURCES.map(s => `<option value="${s}" ${data.source===s?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-row">
+        <label class="form-label">Data do follow-up</label>
+        <input class="form-input" type="date" id="f-followup" value="${data.followup||''}">
+      </div>
+      <div class="form-row">
+        <label class="form-label">Observações</label>
+        <textarea class="form-textarea" id="f-obs" placeholder="Anotações sobre o lead...">${data.obs||''}</textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('form-overlay')">Cancelar</button>
+        <button class="btn btn-accent" onclick="saveLead()">Salvar lead</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+async function saveLead() {
+  const name = document.getElementById('f-name').value.trim();
+  if (!name) { toast('Informe o nome do lead.'); return; }
+  const data = {
+    name,
+    phone: document.getElementById('f-phone').value.trim(),
+    temp:    document.getElementById('f-temp').value,
+    stage:   parseInt(document.getElementById('f-stage').value),
+    product: document.getElementById('f-product').value,
+    source:   document.getElementById('f-source').value,
+    followup: document.getElementById('f-followup').value,
+    obs:      document.getElementById('f-obs').value.trim(),
+    date:  new Date().toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit' }),
+  };
+  if (editingId) {
+    await updateLead(editingId, data);
+    const idx = leads.findIndex(l => l.id === editingId);
+    if (idx > -1) leads[idx] = { ...leads[idx], ...data };
+    toast('Lead atualizado ✓');
+  } else {
+    const row = await insertLead(data);
+    if (row) { data.id = row.id; leads.push(data); }
+    toast('Lead adicionado ✓');
+  }
+  closeModal('form-overlay'); render();
+}
+
+// ── VIEW / DETAIL ──
+function viewLead(id) {
+  const l = leads.find(x => x.id === id); if (!l) return;
+  const tl = TEMPS.find(t => t.id === l.temp);
+  const sl = STAGES.find(s => s.id === l.stage);
+  const waUrl = waLink(l.phone);
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.id = 'detail-overlay';
+  overlay.innerHTML = `
+    <div class="modal">
+      <div class="modal-title">✦ <span>${l.name}</span></div>
+      <div class="form-grid" style="margin-bottom:14px">
+        <div class="detail-section">
+          <div class="detail-label">Temperatura</div>
+          <span class="temp-pill t-${l.temp}">${tl?.icon} ${tl?.label}</span>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">Etapa</div>
+          <div class="detail-value">${sl?.label}</div>
+        </div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-label">Interesse em</div>
+        <div class="detail-value" style="color:var(--accent)">${l.product || '—'}</div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-label">Como chegou</div>
+        <div class="detail-value" style="color:rgba(255,255,255,0.7)">${l.source || '—'}</div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-label">Follow-up agendado</div>
+        <div class="detail-value" style="color:${l.followup && parseLocalDate(l.followup) < new Date() ? '#F07060' : '#5ED4AA'}">${l.followup ? parseLocalDate(l.followup).toLocaleDateString('pt-BR') : '—'}</div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-label">Telefone</div>
+        <div class="detail-value">
+          ${l.phone
+            ? `${l.phone} — <a class="wa-link" href="${waUrl}" target="_blank">Abrir no WhatsApp ↗</a>`
+            : '—'}
+        </div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-label">Observações</div>
+        <div class="detail-obs">${l.obs || 'Nenhuma observação cadastrada.'}</div>
+      </div>
+      <div class="form-grid" style="margin-top:14px">
+        <div>
+          <div class="detail-label" style="margin-bottom:6px">Mover etapa</div>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-ghost" style="flex:1;font-size:11px;padding:6px" onclick="moveStage(${id},-1)">← Voltar</button>
+            <button class="btn btn-ghost" style="flex:1;font-size:11px;padding:6px" onclick="moveStage(${id},1)">Avançar →</button>
+          </div>
+        </div>
+        <div>
+          <div class="detail-label" style="margin-bottom:6px">Ações</div>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-accent" style="flex:1;font-size:11px;padding:6px" onclick="editLead(${id})">✏ Editar</button>
+            <button class="btn btn-danger" style="flex:1;font-size:11px;padding:6px" onclick="deleteLead(${id})">🗑</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('detail-overlay')">Fechar</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+async function moveStage(id, dir) {
+  const idx = leads.findIndex(l => l.id === id); if (idx < 0) return;
+  const newStage = Math.max(0, Math.min(4, leads[idx].stage + dir));
+  leads[idx].stage = newStage;
+  await _supa.from('pipeline_leads').update({ stage: newStage }).eq('id', id);
+  closeModal('detail-overlay'); render();
+  toast('Etapa atualizada ✓');
+}
+
+function editLead(id) {
+  editingId = id;
+  const l = leads.find(x => x.id === id);
+  closeModal('detail-overlay');
+  showFormModal(l);
+}
+
+async function deleteLead(id) {
+  if (!confirm('Remover este lead?')) return;
+  await deleteLeadDB(id);
+  leads = leads.filter(l => l.id !== id);
+  closeModal('detail-overlay'); render();
+  toast('Lead removido');
+}
+
+function closeModal(id) { document.getElementById(id)?.remove(); }
+
+// ── UTILS ──
+function waLink(phone) {
+  if (!phone) return '#';
+  const d = phone.replace(/\D/g,'');
+  return `https://wa.me/${d.startsWith('55') ? d : '55'+d}`;
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// ── PDF EXPORT ──
+function exportPDF() {
+  const STAGE_NAMES = ['Sem Interesse', 'Sem Retorno', 'Aguardando Retorno', 'Em Negociação', 'Contrato Fechado'];
+  const TEMP_NAMES  = { frio:'❄ Frio', morno:'🌿 Morno', quente:'🔥 Quente', urgente:'⚡ Urgente' };
+  const TEMP_COLORS = { frio:'#9AAEF5', morno:'#5ED4AA', quente:'#F0C040', urgente:'#F07060' };
+  const STAGE_COLORS= ['#6B7280','#6B7FCC','#EAB308','#22C55E','#C8A96E'];
+  const now = new Date().toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' });
+  const total = leads.length;
+  const byTemp = { frio:0, morno:0, quente:0, urgente:0 };
+  leads.forEach(l => { if (byTemp[l.temp] !== undefined) byTemp[l.temp]++; });
+  const conv = leads.filter(l => l.stage === 4).length;
+
+  let stagesHTML = '';
+  for (let si = 0; si < 5; si++) {
+    const group = leads.filter(l => l.stage === si);
+    if (!group.length) continue;
+    const c = STAGE_COLORS[si];
+    stagesHTML += `<div class="stage-section">
+      <div class="stage-title" style="border-left:4px solid ${c};color:${c}">${STAGE_NAMES[si]} <span class="stage-count">(${group.length})</span></div>
+      <div class="cards-grid">
+        ${group.map(l => {
+          const tc = TEMP_COLORS[l.temp] || '#9AAEF5';
+          const tn = TEMP_NAMES[l.temp] || l.temp;
+          return `<div class="card" style="border-left:4px solid ${tc}">
+            <div class="card-name">${l.name || '—'}</div>
+            <div class="card-phone">${l.phone || '—'}</div>
+            <div class="card-row">
+              <span class="card-temp" style="color:${tc};border:1px solid ${tc};background:${tc}20">${tn}</span>
+              <span class="card-date">${l.date || ''}</span>
+            </div>
+            <div class="card-info-grid">
+              <div class="card-info-block card-info-interesse">
+                <div class="card-info-label">Interesse</div>
+                <div class="card-info-value">${l.product || '—'}</div>
+              </div>
+              <div class="card-info-block card-info-origem">
+                <div class="card-info-label">Origem</div>
+                <div class="card-info-value card-origem-val">${l.source || '—'}</div>
+              </div>
+            </div>
+            ${l.followup ? (() => {
+              const d = parseLocalDate(l.followup); const today = new Date(); today.setHours(0,0,0,0);
+              const overdue = d < today;
+              const label = d.toLocaleDateString('pt-BR');
+              return `<div class="card-followup ${overdue ? 'fu-overdue' : 'fu-ok'}"><span class="fu-label">Follow-up</span>${label}</div>`;
+            })() : ''}
+            ${l.obs ? `<div class="card-obs">${l.obs}</div>` : ''}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }
+
+  const fullHTML = `<!DOCTYPE html>
+<html lang="pt-BR"><head>
+<meta charset="UTF-8">
+<title>Pipeline de Leads — NEXUS</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    font-family: 'Outfit', Arial, sans-serif;
+    background: #070B30 !important;
+    color: #ffffff !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+  body { padding: 32px 36px; }
+
+  /* HEADER */
+  .header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 24px; padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+  }
+  .logo-row { display: flex; align-items: center; gap: 14px; }
+  .logo-sq {
+    width: 44px; height: 44px; border-radius: 8px;
+    background: linear-gradient(135deg, #C8A96E, #8A5E28);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px; font-weight: 700; color: #070B30;
+  }
+  .logo-name { font-size: 22px; font-weight: 700; letter-spacing: 0.1em; color: #fff; }
+  .logo-sub  { font-size: 10px; color: #C8A96E; letter-spacing: 0.14em; text-transform: uppercase; margin-top: 2px; }
+  .header-meta { text-align: right; font-size: 11px; color: rgba(255,255,255,0.4); line-height: 1.6; }
+
+  /* STATS */
+  .stats { display: grid; grid-template-columns: repeat(6,1fr); gap: 10px; margin-bottom: 28px; }
+  .stat {
+    background: rgba(255,255,255,0.06) !important;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px; padding: 12px 8px; text-align: center;
+  }
+  .stat-l { font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.4); margin-bottom: 5px; }
+  .stat-n  { font-size: 24px; font-weight: 700; color: #fff; }
+
+  /* STAGE */
+  .stage-section { margin-bottom: 24px; page-break-inside: avoid; }
+  .stage-title {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 8px 14px; margin-bottom: 12px;
+    background: rgba(255,255,255,0.04) !important;
+    border-radius: 6px;
+  }
+  .stage-count { font-weight: 400; opacity: 0.5; font-size: 10px; margin-left: 6px; }
+  .cards-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+
+  /* CARD */
+  .card {
+    background: rgba(255,255,255,0.06) !important;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px; padding: 12px 14px;
+    page-break-inside: avoid;
+  }
+  .card-name  { font-size: 13px; font-weight: 600; color: #fff !important; margin-bottom: 3px; }
+  .card-phone { font-size: 10px; color: rgba(255,255,255,0.45) !important; margin-bottom: 8px; }
+  .card-row   { display: flex; align-items: center; justify-content: space-between; }
+  .card-temp  { font-size: 9px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+  .card-date  { font-size: 9px; color: rgba(255,255,255,0.3) !important; }
+  .card-info-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 6px; margin-top: 8px; padding-top: 8px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+  }
+  .card-info-block {
+    border-radius: 5px; padding: 5px 8px;
+  }
+  .card-info-interesse {
+    background: rgba(200,169,110,0.12) !important;
+    border: 1px solid rgba(200,169,110,0.3);
+  }
+  .card-info-origem {
+    background: rgba(126,200,227,0.12) !important;
+    border: 1px solid rgba(126,200,227,0.3);
+  }
+  .card-info-label {
+    font-size: 7px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.1em; margin-bottom: 3px;
+    color: rgba(255,255,255,0.4) !important;
+  }
+  .card-info-value {
+    font-size: 10px; font-weight: 600; color: #C8A96E !important;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .card-origem-val {
+    color: #7EC8E3 !important;
+  }
+  .card-followup {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 7px; padding: 4px 10px;
+    border-radius: 20px; font-size: 10px; font-weight: 600;
+  }
+  .fu-ok     { background: rgba(94,212,170,0.15) !important; color: #5ED4AA !important; border: 1px solid rgba(94,212,170,0.35); }
+  .fu-overdue{ background: rgba(240,112,96,0.15) !important; color: #F07060 !important; border: 1px solid rgba(240,112,96,0.35); }
+  .fu-label  { font-size: 7px; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.7; }
+  .card-obs {
+    font-size: 9px; color: rgba(255,255,255,0.45) !important;
+    margin-top: 5px; padding-top: 5px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    line-height: 1.5;
+  }
+
+  /* FOOTER */
+  .footer {
+    margin-top: 28px; padding-top: 14px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    display: flex; justify-content: space-between;
+    font-size: 9px; color: rgba(255,255,255,0.3) !important;
+  }
+
+  @media print {
+    html, body { background: #070B30 !important; }
+    .card, .stat, .stage-title { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  }
+</style>
+</head><body>
+<div class="header">
+  <div class="logo-row">
+    <div class="logo-sq">NX</div>
+    <div>
+      <div class="logo-name">NEXUS</div>
+      <div class="logo-sub">Pipeline de Leads</div>
+    </div>
+  </div>
+  <div class="header-meta">Gerado em ${now}<br>${total} leads no total</div>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="stat-l">Total</div><div class="stat-n" style="color:#fff">${total}</div></div>
+  <div class="stat"><div class="stat-l">❄ Frios</div><div class="stat-n" style="color:#9AAEF5">${byTemp.frio}</div></div>
+  <div class="stat"><div class="stat-l">🌿 Mornos</div><div class="stat-n" style="color:#5ED4AA">${byTemp.morno}</div></div>
+  <div class="stat"><div class="stat-l">🔥 Quentes</div><div class="stat-n" style="color:#F0C040">${byTemp.quente}</div></div>
+  <div class="stat"><div class="stat-l">⚡ Urgentes</div><div class="stat-n" style="color:#F07060">${byTemp.urgente}</div></div>
+  <div class="stat"><div class="stat-l">✅ Contratos</div><div class="stat-n" style="color:#C8A96E">${conv}</div></div>
+</div>
+
+${stagesHTML}
+
+<div class="footer">
+  <span>Método NEXUS · Confidencial</span>
+  <span>Pipeline exportado em ${now}</span>
+</div>
+
+<script>
+  window.addEventListener('load', function() {
+    setTimeout(function() { window.print(); }, 800);
+  });
+<\/script>
+</body></html>`;
+
+  const blob = new Blob([fullHTML], { type: 'text/html;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const win  = window.open(url, '_blank');
+  if (!win) {
+    toast('Permita pop-ups para exportar o PDF.');
+  }
+}
+
+
+// ── MOBILE COLLAPSIBLE STAGES ──
+function initMobileAccordion() {
+  if (window.innerWidth > 768) return;
+  document.querySelectorAll('.stage-head').forEach(head => {
+    if (head.dataset.accordionBound) return;
+    head.dataset.accordionBound = '1';
+    head.addEventListener('click', function(e) {
+      if (e.target.closest('.add-card-btn')) return;
+      const col = this.closest('.stage-col');
+      col.classList.toggle('collapsed');
+    });
+  });
+}
+
+window.addEventListener('resize', initMobileAccordion);
+
+// ── INIT ──
+(async () => { await loadLeads(); })();
+</script>
+</body>
+</html>
