@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tabela de vendas Douglas</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:#F0EEE9;min-height:100vh;color:#1a1a18}
+:root{
+  --navy:#0B1628;--gold:#C9A84C;--gold-d:#9A7530;
+  --s0:#fff;--s1:#F8F7F4;--s2:#F0EEE9;
+  --bd:#E5E3DC;--bds:#D3D1C7;
+  --t1:#1a1a18;--t2:#5F5E5A;--t3:#888780;
+  --gbg:#E4F5EE;--gbd:#1D9E75;--gtx:#085041;
+  --abg:#FEF3DC;--abd:#D4940A;--atx:#7A4F00;
+  --rbg:#FDEAEA;--rbd:#E24B4A;--rtx:#7A1F1F;
+  --r:8px;
+}
+.page{max-width:1160px;margin:0 auto;padding:1.5rem 1rem 3rem}
+.legend{display:flex;gap:6px;flex-wrap:wrap;background:var(--s0);border:1px solid var(--bd);border-radius:var(--r);padding:.65rem 1rem;margin-bottom:1rem;align-items:center}
+.ll{font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-right:4px}
+.li{display:flex;align-items:center;gap:5px;font-size:12px;padding:3px 10px;border-radius:20px;font-weight:500}
+.li-np{background:var(--rbg);color:var(--rtx);border:1px solid var(--rbd)}
+.li-pg{background:var(--abg);color:var(--atx);border:1px solid var(--abd)}
+.li-cp{background:var(--gbg);color:var(--gtx);border:1px solid var(--gbd)}
+.ld{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.ld-np{background:var(--rbd)}.ld-pg{background:var(--abd)}.ld-cp{background:var(--gbd)}
+.topbar{background:var(--s0);border:1px solid var(--bd);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px}
+.bm{width:36px;height:36px;border-radius:9px;background:var(--navy);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.bm span{color:var(--gold);font-size:12px;font-weight:600;letter-spacing:.5px}
+.bn2{font-size:15px;font-weight:600}.bs2{font-size:12px;color:var(--t3);margin-top:1px}
+.ta{display:flex;gap:8px;flex-wrap:wrap}
+.btn-add{background:var(--navy);color:var(--gold);border:none;border-radius:var(--r);padding:8px 15px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit}
+.btn-add:hover{opacity:.85}
+.btn-sec{background:var(--s0);border:1px solid var(--bds);border-radius:var(--r);padding:7px 13px;font-size:13px;color:var(--t2);cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px}
+.btn-sec:hover{background:var(--s1)}
+.btn-rel{background:var(--gold-d);color:#fff;border:none;border-radius:var(--r);padding:8px 15px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px}
+.btn-rel:hover{opacity:.85}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px;margin-bottom:1rem}
+.metric{background:var(--s0);border:1px solid var(--bd);border-radius:var(--r);padding:.9rem 1rem}
+.ml{font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.mv{font-size:18px;font-weight:600;color:var(--t1)}
+.mv.mg{color:var(--gold-d)}.mv.mgr{color:var(--gtx)}.mv.mr{color:var(--rtx)}.mv.ma{color:var(--atx)}
+.ms{font-size:11px;color:var(--t3);margin-top:3px}
+.filters{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;align-items:center}
+.fchip{background:var(--s0);border:1px solid var(--bds);border-radius:20px;padding:5px 13px;font-size:12px;color:var(--t2);cursor:pointer;font-family:inherit}
+.fchip:hover{border-color:var(--navy)}.fchip.active{background:var(--navy);border-color:var(--navy);color:var(--gold)}
+.sw{position:relative;margin-left:auto}
+.sw input{background:var(--s0);border:1px solid var(--bds);border-radius:var(--r);padding:6px 10px 6px 30px;font-size:13px;color:var(--t1);width:200px;outline:none;font-family:inherit}
+.sw input:focus{border-color:var(--navy)}
+.si2{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:13px;pointer-events:none}
+.tw{background:var(--s0);border:1px solid var(--bd);border-radius:12px;overflow:hidden}
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl thead th{background:var(--s1);padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--bd);white-space:nowrap}
+.tbl tbody tr.dr{border-bottom:1px solid var(--bd);cursor:pointer;transition:background .1s}
+.tbl tbody tr.dr:hover{background:var(--s1)}
+.tbl td{padding:11px 14px;vertical-align:middle}
+.tdn{font-weight:500;font-size:13px;color:var(--t1)}.tdp{font-size:11px;color:var(--t3);margin-top:2px}
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap}
+.bc{background:#EDF2FB;color:#185FA5}.bp{background:var(--s1);border:1px solid var(--bds);color:var(--t2);font-size:10px}
+.chev{font-size:12px;color:var(--t3);display:inline-block;transition:transform .2s}
+.chev.open{transform:rotate(180deg)}
+.sbar{display:flex;gap:3px;align-items:center;min-width:110px}
+.ss{height:8px;border-radius:2px;flex:1}
+.ss-np{background:var(--rbd)}.ss-pg{background:var(--abd)}.ss-cp{background:var(--gbd)}
+.sbl{font-size:10px;color:var(--t3);margin-top:3px;white-space:nowrap}
+.er{background:var(--s1)!important;cursor:default!important}
+.ei{padding:1rem 1.25rem;display:grid;grid-template-columns:290px 1fr;gap:1.25rem}
+@media(max-width:660px){.ei{grid-template-columns:1fr}}
+.sl{font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.eb{background:var(--s0);border:1px solid var(--bd);border-radius:var(--r);padding:10px 14px}
+.ebr{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:13px}
+.ebr+.ebr{border-top:1px solid var(--bd)}
+.ebl{color:var(--t2)}.ebv{font-weight:500;color:var(--t1)}
+.obs{background:var(--s0);border:1px solid var(--bd);border-radius:var(--r);padding:8px 12px;font-size:12px;color:var(--t2);margin-top:10px}
+.ra{display:flex;gap:8px;margin-top:10px}
+.be{background:var(--s0);border:1px solid var(--bds);border-radius:var(--r);padding:5px 11px;font-size:12px;color:var(--t2);cursor:pointer;font-family:inherit}
+.be:hover{background:var(--s2)}
+.bdel{background:var(--s0);border:1px solid var(--bds);border-radius:var(--r);padding:5px 11px;font-size:12px;color:var(--rtx);cursor:pointer;font-family:inherit}
+.bdel:hover{background:var(--rbg)}
+.ssbox{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
+.sb{border-radius:var(--r);padding:8px 10px;text-align:center}
+.sb-np{background:var(--rbg);border:1px solid var(--rbd)}
+.sb-pg{background:var(--abg);border:1px solid var(--abd)}
+.sb-cp{background:var(--gbg);border:1px solid var(--gbd)}
+.sbv{font-size:13px;font-weight:600}
+.sb-np .sbv{color:var(--rtx)}.sb-pg .sbv{color:var(--atx)}.sb-cp .sbv{color:var(--gtx)}
+.sbl2{font-size:10px;font-weight:500;margin-top:2px}
+.sb-np .sbl2{color:var(--rtx)}.sb-pg .sbl2{color:var(--atx)}.sb-cp .sbl2{color:var(--gtx)}
+.sbsub{font-size:10px;opacity:.7;margin-top:1px}
+.sb-np .sbsub{color:var(--rtx)}.sb-pg .sbsub{color:var(--atx)}.sb-cp .sbsub{color:var(--gtx)}
+.pg2{display:grid;grid-template-columns:repeat(auto-fill,minmax(105px,1fr));gap:6px}
+.pi{border-radius:var(--r);padding:8px 10px;border:1.5px solid}
+.pi-np{background:var(--rbg);border-color:var(--rbd)}
+.pi-pg{background:var(--abg);border-color:var(--abd)}
+.pi-cp{background:var(--gbg);border-color:var(--gbd)}
+.pnum{font-size:10px;margin-bottom:1px;font-weight:500}
+.pi-np .pnum{color:var(--rtx)}.pi-pg .pnum{color:var(--atx)}.pi-cp .pnum{color:var(--gtx)}
+.pdt{font-size:10px;margin-bottom:3px;opacity:.75}
+.pi-np .pdt{color:var(--rtx)}.pi-pg .pdt{color:var(--atx)}.pi-cp .pdt{color:var(--gtx)}
+.pval{font-size:12px;font-weight:600;margin-bottom:4px}
+.pi-np .pval{color:var(--rtx)}.pi-pg .pval{color:var(--atx)}.pi-cp .pval{color:var(--gtx)}
+.psel{width:100%;background:transparent;border:none;font-size:10px;font-weight:600;cursor:pointer;outline:none;font-family:inherit;padding:0}
+.pi-np .psel{color:var(--rtx)}.pi-pg .psel{color:var(--atx)}.pi-cp .psel{color:var(--gtx)}
+.vb{border-radius:var(--r);padding:8px 12px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:8px;border:1.5px solid}
+.vb-np{background:var(--rbg);border-color:var(--rbd)}
+.vb-pg{background:var(--abg);border-color:var(--abd)}
+.vb-cp{background:var(--gbg);border-color:var(--gbd)}
+.vlbl{font-size:10px;font-weight:500}
+.vb-np .vlbl{color:var(--rtx)}.vb-pg .vlbl{color:var(--atx)}.vb-cp .vlbl{color:var(--gtx)}
+.vvv{font-size:13px;font-weight:600;margin-top:1px}
+.vb-np .vvv{color:var(--rtx)}.vb-pg .vvv{color:var(--atx)}.vb-cp .vvv{color:var(--gtx)}
+.vsel{background:rgba(255,255,255,.6);border:1px solid rgba(0,0,0,.12);border-radius:6px;padding:3px 7px;font-size:11px;font-weight:600;cursor:pointer;outline:none;font-family:inherit}
+/* modal */
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:100;padding:1rem}
+.md{background:var(--s0);border:1px solid var(--bd);border-radius:12px;width:100%;max-width:560px;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.mh{padding:1rem 1.25rem;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--s0);z-index:1}
+.mt3{font-size:15px;font-weight:600}.mc{background:none;border:none;cursor:pointer;color:var(--t3);font-size:22px;line-height:1;font-family:inherit}
+.mb3{padding:1.25rem}
+.fr{margin-bottom:14px}
+.fl{font-size:12px;color:var(--t2);margin-bottom:5px;display:block;font-weight:500}
+.fi{width:100%;background:var(--s1);border:1px solid var(--bds);border-radius:var(--r);padding:8px 11px;font-size:13px;color:var(--t1);outline:none;font-family:inherit}
+.fi:focus{border-color:var(--navy);background:var(--s0)}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mft{padding:1rem 1.25rem;border-top:1px solid var(--bd);display:flex;gap:8px;justify-content:flex-end;position:sticky;bottom:0;background:var(--s0)}
+.bcan{background:var(--s1);border:1px solid var(--bds);border-radius:var(--r);padding:8px 15px;font-size:13px;color:var(--t2);cursor:pointer;font-family:inherit}
+.bsav{background:var(--navy);color:var(--gold);border:none;border-radius:var(--r);padding:8px 18px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit}
+.bsav:hover{opacity:.85}
+.dl{font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;padding:10px 0 6px;border-top:1px solid var(--bd);margin-top:4px}
+.vfb{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);padding:10px 12px;margin-bottom:4px}
+/* relatório modal */
+.rel-section{margin-bottom:1.5rem}
+.rel-title{font-size:13px;font-weight:600;padding:8px 12px;border-radius:var(--r);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+.rel-np{background:var(--rbg);color:var(--rtx);border:1px solid var(--rbd)}
+.rel-pg{background:var(--abg);color:var(--atx);border:1px solid var(--abd)}
+.rel-cp{background:var(--gbg);color:var(--gtx);border:1px solid var(--gbd)}
+.rel-row{display:flex;justify-content:space-between;align-items:center;padding:7px 12px;font-size:13px;border-bottom:1px solid var(--bd);background:var(--s0)}
+.rel-row:last-child{border-bottom:none}
+.rel-row:hover{background:var(--s1)}
+.rel-name{font-weight:500;flex:1}
+.rel-info{font-size:11px;color:var(--t3);flex:1;text-align:center}
+.rel-val{font-weight:600;text-align:right;min-width:100px}
+.rel-total{display:flex;justify-content:space-between;padding:8px 12px;font-size:13px;font-weight:600;border-top:2px solid var(--bds);background:var(--s1);border-radius:0 0 var(--r) var(--r)}
+.rel-wrap{border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;margin-bottom:4px}
+.print-btn{background:var(--navy);color:var(--gold);border:none;border-radius:var(--r);padding:8px 18px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;width:100%;margin-top:12px}
+.print-btn:hover{opacity:.85}
+@media print{
+  .topbar,.legend,.filters,.ta,.ra,.mo,.page>*:not(.print-area){display:none!important}
+  .print-area{display:block!important}
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="topbar">
+    <div class="brand">
+      <div class="bm"><span>NX</span></div>
+      <div><div class="bn2">Tabela de vendas Douglas</div><div class="bs2">DOP e FOC (Renovação)</div></div>
+    </div>
+    <div class="ta">
+      <button class="btn-sec" onclick="exportCSV()">↓ CSV</button>
+      <button class="btn-rel" onclick="abrirRelatorio()">📊 Relatório</button>
+      <button class="btn-add" onclick="openModal()">+ Nova venda</button>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span class="ll">Status:</span>
+    <span class="li li-np"><span class="ld ld-np"></span>Não pago — parcela não caiu ainda</span>
+    <span class="li li-pg"><span class="ld ld-pg"></span>Pago — caiu na conta, comissão pendente</span>
+    <span class="li li-cp"><span class="ld ld-cp"></span>Comissão paga — caiu e comissão recebida</span>
+  </div>
+
+  <div class="metrics" id="metrics"></div>
+
+  <div class="filters">
+    <button class="fchip active" onclick="setFilter('todos',this)">Todos</button>
+    <button class="fchip" onclick="setFilter('ALINHADORES',this)">Alinhadores</button>
+    <button class="fchip" onclick="setFilter('MENTORIA',this)">Mentoria</button>
+    <button class="fchip" onclick="setFilter('DOP',this)">DOP</button>
+    <button class="fchip" onclick="setFilter('COMBO',this)">Combo</button>
+    <button class="fchip" onclick="setFilter('outros',this)">Outros</button>
+    <div class="sw"><span class="si2">⌕</span><input type="text" id="search" placeholder="Buscar por nome..." oninput="renderTable()"></div>
+  </div>
+
+  <div class="tw">
+    <table class="tbl">
+      <thead><tr>
+        <th></th><th>Aluna</th><th>Curso</th><th>Valor líquido</th>
+        <th>Pagamento</th><th>Situação das parcelas</th><th>Comissão a receber</th><th>Data</th>
+      </tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal Nova/Editar Venda -->
+<div class="mo" id="modal" style="display:none" onclick="closeModalOverlay(event)">
+  <div class="md">
+    <div class="mh"><span class="mt3" id="modal-title">Nova venda</span><button class="mc" onclick="closeModal()">&times;</button></div>
+    <div class="mb3">
+      <div class="fg">
+        <div class="fr"><label class="fl">Nome *</label><input class="fi" id="f-nome" placeholder="Nome completo"></div>
+        <div class="fr"><label class="fl">Telefone</label><input class="fi" id="f-tel" placeholder="(00) 00000-0000"></div>
+      </div>
+      <div class="fg">
+        <div class="fr"><label class="fl">Curso</label>
+          <select class="fi" id="f-curso"><option value="">Selecionar</option>
+            <option>ALINHADORES</option><option>DOP</option><option>FOC</option>
+            <option>COMBO</option><option>MENTORIA</option><option>DOBRAS</option>
+            <option>MANEJO</option><option>MINI implante</option></select></div>
+        <div class="fr"><label class="fl">Data da compra</label><input class="fi" type="date" id="f-data"></div>
+      </div>
+      <div class="fr"><label class="fl">Valor líquido (R$) *</label><input class="fi" id="f-valor" type="number" step="0.01" placeholder="0,00"></div>
+      <div class="fr"><label class="fl">Observação</label><input class="fi" id="f-just" placeholder="Opcional"></div>
+      <div class="dl">Pagamento à vista (opcional)</div>
+      <div class="vfb">
+        <div class="fg">
+          <div class="fr" style="margin-bottom:0"><label class="fl">Forma de pagamento 1</label>
+            <select class="fi" id="f-forma1"><option value="">Nenhum</option>
+              <option>Cartão crédito</option><option>Cartão débito</option>
+              <option>Boleto</option><option>Pix à vista</option><option>Pix recorrente</option></select></div>
+          <div class="fr" style="margin-bottom:0"><label class="fl">Valor à vista (R$)</label>
+            <input class="fi" id="f-valor-vista" type="number" step="0.01" placeholder="0,00"></div>
+        </div>
+      </div>
+      <div class="dl">Parcelamento</div>
+      <div class="fg">
+        <div class="fr"><label class="fl">Forma de pagamento 2</label>
+          <select class="fi" id="f-forma2"><option value="">Nenhum</option>
+            <option>Cartão crédito</option><option>Cartão débito</option>
+            <option>Boleto</option><option>Pix à vista</option><option>Pix recorrente</option>
+            <option>Transferência</option><option>Dinheiro</option></select></div>
+        <div class="fr"><label class="fl">Número de parcelas</label>
+          <select class="fi" id="f-parcelas"><option value="">Selecionar</option>
+            <option>1x</option><option>2x</option><option>3x</option><option>4x</option>
+            <option>5x</option><option>6x</option><option>7x</option><option>8x</option>
+            <option>9x</option><option>10x</option><option>11x</option><option>12x</option></select></div>
+      </div>
+    </div>
+    <div class="mft">
+      <button class="bcan" onclick="closeModal()">Cancelar</button>
+      <button class="bsav" onclick="saveVenda()">Salvar venda</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Relatório -->
+<div class="mo" id="modal-rel" style="display:none" onclick="closeRelOverlay(event)">
+  <div class="md" style="max-width:680px">
+    <div class="mh">
+      <span class="mt3">📊 Relatório de comissões</span>
+      <button class="mc" onclick="fecharRelatorio()">&times;</button>
+    </div>
+    <div class="mb3" id="rel-body"></div>
+    <div class="mft">
+      <button class="bcan" onclick="fecharRelatorio()">Fechar</button>
+      <button class="bsav" onclick="exportRelPDF()">↓ Exportar PDF</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SO=['NÃO PAGO','PAGO','COMISSÃO PAGA'];
+const fmt=v=>'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fd=d=>d?d.split('-').reverse().join('/'):'—';
+const AUTO_PAGO=['Cartão crédito','Pix recorrente'];
+const VISTA_PAGO=['Cartão débito','Boleto','Pix à vista'];
+
+function hoje(){const h=new Date();h.setHours(0,0,0,0);return h;}
+
+function dataParcela(dataCompra,nMes){
+  const d=new Date(dataCompra+'T12:00:00');
+  const dia=d.getDate();
+  const result=new Date(d.getFullYear(),d.getMonth()+nMes,dia);
+  if(result.getDate()!==dia) result.setDate(0);
+  return result;
+}
+
+function fmtData(d){
+  if(!d) return '—';
+  return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();
+}
+
+// Regra: 1ª parcela sempre PAGO (já caiu no dia da compra)
+// Parcelas seguintes: PAGO se data <= hoje (cartão/pix recorrente), caso contrário NÃO PAGO
+// Nunca regredir COMISSÃO PAGA
+function calcStatusParcela(dataCompra, idx, forma, statusAtual){
+  if(statusAtual==='COMISSÃO PAGA') return 'COMISSÃO PAGA';
+  if(!AUTO_PAGO.includes(forma)) return statusAtual; // não auto, mantém
+  if(idx===0) return 'PAGO'; // 1ª sempre paga
+  const dp=dataParcela(dataCompra, idx); // idx já é o offset em meses (1 para 2ª parcela etc)
+  return dp<=hoje() ? 'PAGO' : 'NÃO PAGO';
+}
+
+function aplicaAutoStatus(v){
+  if(!v.data) return;
+  const forma=v.forma_pgto2||v.forma_pgto1||'';
+  if(!AUTO_PAGO.includes(forma)) return;
+  (v.parcelas_detail||[]).forEach((p,i)=>{
+    p.status=calcStatusParcela(v.data, i, forma, p.status);
+  });
+}
+
+function piClass(s){return s==='PAGO'?'pi-pg':s==='COMISSÃO PAGA'?'pi-cp':'pi-np';}
+function vbClass(s){return s==='PAGO'?'vb-pg':s==='COMISSÃO PAGA'?'vb-cp':'vb-np';}
+
+const SUPABASE_URL='https://yvinuubwaxrqhlzkayes.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2aW51dWJ3YXhycWhsemtheWVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMzQ1ODEsImV4cCI6MjA5NzgxMDU4MX0.6WwNDzJNLUNLL6jggJ_qXf5tAJwccSa-b7sJzNulRSI';
+
+async function sbFetch(path,opts){
+  opts=opts||{};
+  const res=await fetch(SUPABASE_URL+'/rest/v1/'+path,{
+    headers:Object.assign({'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Prefer':'return=representation'},opts.headers||{}),
+    method:opts.method||'GET',
+    body:opts.body||undefined
+  });
+  if(!res.ok){const e=await res.text();throw new Error(e);}
+  return res.status===204?null:res.json();
+}
+
+async function carregarDados(){
+  try{
+    const rows=await sbFetch('vendas_douglas?select=*&order=data.asc');
+    data=rows.map(function(r){
+      const pd=typeof r.parcelas_detail==='string'?JSON.parse(r.parcelas_detail):(r.parcelas_detail||[]);
+      return{
+        id:r.id,data:r.data,nome:r.nome,telefone:r.telefone||'',curso:r.curso||'',
+        valor_liquido:parseFloat(r.valor_liquido)||0,justificativa:r.justificativa||'',
+        forma_pgto1:r.forma_pgto1||'',valor_vista:parseFloat(r.valor_vista)||0,
+        status_vista:r.status_vista||'NÃO PAGO',forma_pgto2:r.forma_pgto2||'',
+        valor_parcelado:parseFloat(r.valor_parcelado)||0,parcelas:r.parcelas||'',
+        parcelas_detail:pd,valor_vista2:parseFloat(r.valor_vista2)||0,
+        status_vista2:r.status_vista2||'NÃO PAGO'
+      };
+    });
+    data.forEach(function(v){aplicaAutoStatus(v);});
+    renderTable();
+  }catch(e){
+    console.error('Erro ao carregar:',e);
+    document.getElementById('tbody').innerHTML='<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--rtx)">Erro ao conectar com o banco. Verifique a conexão.</td></tr>';
+  }
+}
+
+async function salvarVenda(v){
+  const payload={
+    data:v.data,nome:v.nome,telefone:v.telefone,curso:v.curso,
+    valor_liquido:v.valor_liquido,justificativa:v.justificativa,
+    forma_pgto1:v.forma_pgto1,valor_vista:v.valor_vista,status_vista:v.status_vista,
+    forma_pgto2:v.forma_pgto2,valor_parcelado:v.valor_parcelado,parcelas:v.parcelas,
+    parcelas_detail:v.parcelas_detail,valor_vista2:v.valor_vista2||0,
+    status_vista2:v.status_vista2||'NÃO PAGO'
+  };
+  if(v._isNew){
+    const saved=await sbFetch('vendas_douglas',{method:'POST',body:JSON.stringify(payload)});
+    return Array.isArray(saved)?saved[0].id:saved.id;
+  }else{
+    await sbFetch('vendas_douglas?id=eq.'+v.id,{method:'PATCH',body:JSON.stringify(payload)});
+    return v.id;
+  }
+}
+
+async function apagarVenda(id){
+  await sbFetch('vendas_douglas?id=eq.'+id,{method:'DELETE'});
+}
+
+let data=[
+  {id:1,data:'2026-03-17',nome:'Daniely Ribeiro',telefone:'(84) 988616949',curso:'ALINHADORES',valor_liquido:1815.82,justificativa:'',forma_pgto1:'Cartão crédito',valor_vista:0,status_vista:'NÃO PAGO',forma_pgto2:'',valor_parcelado:1815.82,parcelas:'12x',parcelas_detail:[{valor:151.32,status:'COMISSÃO PAGA'},{valor:151.32,status:'COMISSÃO PAGA'},{valor:151.32,status:'COMISSÃO PAGA'},{valor:151.32,status:'COMISSÃO PAGA'},{valor:151.32,status:'NÃO PAGO'},{valor:151.32,status:'NÃO PAGO'},{valor:151.32,status:'NÃO PAGO'},{valor:151.32,status:'NÃO PAGO'},{valor:151.32,status:'NÃO PAGO'},{valor:151.32,status:'NÃO PAGO'},{valor:151.32,status:'NÃO PAGO'},{valor:151.32,status:'NÃO PAGO'}]},
+  {id:2,data:'2026-03-18',nome:'Antonia Marta',telefone:'+244 923 706 729',curso:'ALINHADORES',valor_liquido:1815.82,justificativa:'Boleto autorizado pela Dra. Pri',forma_pgto1:'Boleto',valor_vista:0,status_vista:'NÃO PAGO',forma_pgto2:'',valor_parcelado:1815.82,parcelas:'4x',parcelas_detail:[{valor:453.95,status:'COMISSÃO PAGA'},{valor:453.95,status:'COMISSÃO PAGA'},{valor:453.95,status:'COMISSÃO PAGA'},{valor:453.95,status:'NÃO PAGO'}]},
+  {id:3,data:'2026-03-25',nome:'Cristiane Yano Shimura',telefone:'(11) 994492694',curso:'ALINHADORES',valor_liquido:1815.82,justificativa:'',forma_pgto1:'Cartão crédito',valor_vista:0,status_vista:'NÃO PAGO',forma_pgto2:'',valor_parcelado:1815.82,parcelas:'12x',parcelas_detail:[{valor:151.32,status:'COMISSÃO PAGA'},{valor:151.32,status:'COMISSÃO PAGA'},{valor:151.32,status:'COMISSÃO PAGA'},{valor:151.32,status:'COMISSÃO PAGA'},{valor:151.32,status:'NÃO PAGO'},{valor:151.32,status:'NÃO PAGO'},{valor:151.32,status:'NÃO PAGO'},{valor:151.32,status:'NÃO PAGO'},{valor:151.32,status:'NÃO PAGO'},{valor:151.32,status:'NÃO PAGO'},{valor:151.32,status:'NÃO PAGO'},{valor:151.32,status:'NÃO PAGO'}]},
+  {id:4,data:'2026-03-26',nome:'Monaliza Cristina',telefone:'(11) 960142766',curso:'ALINHADORES',valor_liquido:1815.78,justificativa:'',forma_pgto1:'Cartão crédito',valor_vista:0,status_vista:'NÃO PAGO',forma_pgto2:'',valor_parcelado:1815.78,parcelas:'3x',parcelas_detail:[{valor:605.26,status:'COMISSÃO PAGA'},{valor:605.26,status:'COMISSÃO PAGA'},{valor:605.26,status:'COMISSÃO PAGA'}]},
+  {id:5,data:'2026-04-02',nome:'Patricia',telefone:'(33) 991970141',curso:'ALINHADORES',valor_liquido:1815.82,justificativa:'',forma_pgto1:'Cartão crédito',valor_vista:0,status_vista:'NÃO PAGO',forma_pgto2:'',valor_parcelado:1815.82,parcelas:'12x',parcelas_detail:[{valor:151.32,status:'COMISSÃO PAGA'},{valor:151.32,status:'COMISSÃO PAGA'},{valor:151.32,status:'COMISSÃO PAGA'},{valor:151.32,status:'NÃO PAGO'},{valor:151.32,status:'NÃO PAGO'},{valor:151.32,status:'NÃO PAGO'},{valor:151.32,status:'NÃO PAGO'},{valor:151.32,status:'NÃO PAGO'},{valor:151.32,status:'NÃO PAGO'},{valor:151.32,status:'NÃO PAGO'},{valor:151.32,status:'NÃO PAGO'},{valor:151.32,status:'NÃO PAGO'}]},
+  {id:6,data:'2026-04-04',nome:'Bruna Radaelli',telefone:'(67) 991890357',curso:'ALINHADORES',valor_liquido:1815.82,justificativa:'',forma_pgto1:'Cartão crédito',valor_vista:0,status_vista:'NÃO PAGO',forma_pgto2:'',valor_parcelado:1815.82,parcelas:'12x',parcelas_detail:[{valor:151.32,status:'COMISSÃO PAGA'},{valor:151.32,status:'COMISSÃO PAGA'},{valor:151.32,status:'COMISSÃO PAGA'},{valor:151.32,status:'NÃO PAGO'},{valor:151.32,status:'NÃO PAGO'},{valor:151.32,status:'NÃO PAGO'},{valor:151.32,status:'NÃO PAGO'},{valor:151.32,status:'NÃO PAGO'},{valor:151.32,status:'NÃO PAGO'},{valor:151.32,status:'NÃO PAGO'},{valor:151.32,status:'NÃO PAGO'},{valor:151.32,status:'NÃO PAGO'}]},
+  {id:7,data:'2026-04-05',nome:'Luciara Vanize Ottonelli Stopiglia',telefone:'(55) 9963-3759',curso:'ALINHADORES',valor_liquido:1815.78,justificativa:'',forma_pgto1:'Cartão crédito',valor_vista:0,status_vista:'NÃO PAGO',forma_pgto2:'',valor_parcelado:1815.78,parcelas:'10x',parcelas_detail:[{valor:181.58,status:'COMISSÃO PAGA'},{valor:181.58,status:'COMISSÃO PAGA'},{valor:181.58,status:'COMISSÃO PAGA'},{valor:181.58,status:'NÃO PAGO'},{valor:181.58,status:'NÃO PAGO'},{valor:181.58,status:'NÃO PAGO'},{valor:181.58,status:'NÃO PAGO'},{valor:181.58,status:'NÃO PAGO'},{valor:181.58,status:'NÃO PAGO'},{valor:181.58,status:'NÃO PAGO'}]},
+  {id:8,data:'2026-05-03',nome:'Jennifer Klabunde',telefone:'(67) 99662-1227',curso:'COMBO',valor_liquido:2663.29,justificativa:'DOP+Alinhadores 360',forma_pgto1:'Cartão crédito',valor_vista:0,status_vista:'NÃO PAGO',forma_pgto2:'',valor_parcelado:2663.29,parcelas:'12x',parcelas_detail:[{valor:221.94,status:'COMISSÃO PAGA'},{valor:221.94,status:'COMISSÃO PAGA'},{valor:221.94,status:'NÃO PAGO'},{valor:221.94,status:'NÃO PAGO'},{valor:221.94,status:'NÃO PAGO'},{valor:221.94,status:'NÃO PAGO'},{valor:221.94,status:'NÃO PAGO'},{valor:221.94,status:'NÃO PAGO'},{valor:221.94,status:'NÃO PAGO'},{valor:221.94,status:'NÃO PAGO'},{valor:221.94,status:'NÃO PAGO'},{valor:221.94,status:'NÃO PAGO'}]},
+  {id:9,data:'2026-05-19',nome:'Julia C Massoni',telefone:'(45) 9973-2239',curso:'MENTORIA',valor_liquido:60000,justificativa:'',forma_pgto1:'Pix recorrente',valor_vista:0,status_vista:'NÃO PAGO',forma_pgto2:'',valor_parcelado:60000,parcelas:'12x',parcelas_detail:[{valor:5000,status:'COMISSÃO PAGA'},{valor:5000,status:'COMISSÃO PAGA'},{valor:5000,status:'NÃO PAGO'},{valor:5000,status:'NÃO PAGO'},{valor:5000,status:'NÃO PAGO'},{valor:5000,status:'NÃO PAGO'},{valor:5000,status:'NÃO PAGO'},{valor:5000,status:'NÃO PAGO'},{valor:5000,status:'NÃO PAGO'},{valor:5000,status:'NÃO PAGO'},{valor:5000,status:'NÃO PAGO'},{valor:5000,status:'NÃO PAGO'}]},
+  {id:10,data:'2026-05-29',nome:'Jaqueline Lopes',telefone:'(49) 8433-2988',curso:'ALINHADORES',valor_liquido:1815.78,justificativa:'',forma_pgto1:'Cartão crédito',valor_vista:0,status_vista:'NÃO PAGO',forma_pgto2:'',valor_parcelado:1815.78,parcelas:'12x',parcelas_detail:[{valor:151.31,status:'COMISSÃO PAGA'},{valor:151.31,status:'NÃO PAGO'},{valor:151.31,status:'NÃO PAGO'},{valor:151.31,status:'NÃO PAGO'},{valor:151.31,status:'NÃO PAGO'},{valor:151.31,status:'NÃO PAGO'},{valor:151.31,status:'NÃO PAGO'},{valor:151.31,status:'NÃO PAGO'},{valor:151.31,status:'NÃO PAGO'},{valor:151.31,status:'NÃO PAGO'},{valor:151.31,status:'NÃO PAGO'},{valor:151.31,status:'NÃO PAGO'}]},
+  {id:11,data:'2026-06-11',nome:'Regina Kaori',telefone:'(11) 97693-2266',curso:'',valor_liquido:616.56,justificativa:'Comunidade whats',forma_pgto1:'Cartão crédito',valor_vista:0,status_vista:'NÃO PAGO',forma_pgto2:'',valor_parcelado:616.56,parcelas:'12x',parcelas_detail:[{valor:51.38,status:'COMISSÃO PAGA'},{valor:51.38,status:'NÃO PAGO'},{valor:51.38,status:'NÃO PAGO'},{valor:51.38,status:'NÃO PAGO'},{valor:51.38,status:'NÃO PAGO'},{valor:51.38,status:'NÃO PAGO'},{valor:51.38,status:'NÃO PAGO'},{valor:51.38,status:'NÃO PAGO'},{valor:51.38,status:'NÃO PAGO'},{valor:51.38,status:'NÃO PAGO'},{valor:51.38,status:'NÃO PAGO'},{valor:51.38,status:'NÃO PAGO'}]},
+  {id:12,data:'2026-06-17',nome:'Mauricio Luiz Camacho Costa',telefone:'(42) 991319957',curso:'DOP',valor_liquido:2741.76,justificativa:'',forma_pgto1:'Cartão crédito',valor_vista:0,status_vista:'NÃO PAGO',forma_pgto2:'',valor_parcelado:2741.76,parcelas:'12x',parcelas_detail:[{valor:228.48,status:'PAGO'},{valor:228.48,status:'NÃO PAGO'},{valor:228.48,status:'NÃO PAGO'},{valor:228.48,status:'NÃO PAGO'},{valor:228.48,status:'NÃO PAGO'},{valor:228.48,status:'NÃO PAGO'},{valor:228.48,status:'NÃO PAGO'},{valor:228.48,status:'NÃO PAGO'},{valor:228.48,status:'NÃO PAGO'},{valor:228.48,status:'NÃO PAGO'},{valor:228.48,status:'NÃO PAGO'},{valor:228.48,status:'NÃO PAGO'}]},
+  {id:13,data:'2026-06-19',nome:'Hellen Caroliny de Carvalho',telefone:'(43) 991251408',curso:'',valor_liquido:912.27,justificativa:'Discussão de casos ao-vivo Combo',forma_pgto1:'Cartão crédito',valor_vista:0,status_vista:'NÃO PAGO',forma_pgto2:'',valor_parcelado:912.27,parcelas:'6x',parcelas_detail:[{valor:152.04,status:'PAGO'},{valor:152.04,status:'NÃO PAGO'},{valor:152.04,status:'NÃO PAGO'},{valor:152.04,status:'NÃO PAGO'},{valor:152.04,status:'NÃO PAGO'},{valor:152.04,status:'NÃO PAGO'}]},
+  {id:14,data:'2026-06-22',nome:'Bruna Paula Neves',telefone:'(21) 999792923',curso:'',valor_liquido:912.28,justificativa:'Discussão de casos ao-vivo Combo',forma_pgto1:'Cartão crédito',valor_vista:0,status_vista:'NÃO PAGO',forma_pgto2:'',valor_parcelado:912.28,parcelas:'9x',parcelas_detail:[{valor:101.36,status:'PAGO'},{valor:101.36,status:'NÃO PAGO'},{valor:101.36,status:'NÃO PAGO'},{valor:101.36,status:'NÃO PAGO'},{valor:101.36,status:'NÃO PAGO'},{valor:101.36,status:'NÃO PAGO'},{valor:101.36,status:'NÃO PAGO'},{valor:101.36,status:'NÃO PAGO'},{valor:101.36,status:'NÃO PAGO'}]},
+  {id:15,data:'2026-06-26',nome:'Juliana Andion',telefone:'(71) 9262-3707',curso:'MENTORIA',valor_liquido:53797,justificativa:'',forma_pgto1:'Pix à vista',valor_vista:15000,status_vista:'PAGO',forma_pgto2:'Cartão crédito',valor_parcelado:38797,parcelas:'12x',parcelas_detail:[{valor:3233.08,status:'NÃO PAGO'},{valor:3233.08,status:'NÃO PAGO'},{valor:3233.08,status:'NÃO PAGO'},{valor:3233.08,status:'NÃO PAGO'},{valor:3233.08,status:'NÃO PAGO'},{valor:3233.08,status:'NÃO PAGO'},{valor:3233.08,status:'NÃO PAGO'},{valor:3233.08,status:'NÃO PAGO'},{valor:3233.08,status:'NÃO PAGO'},{valor:3233.08,status:'NÃO PAGO'},{valor:3233.08,status:'NÃO PAGO'},{valor:3233.08,status:'NÃO PAGO'}]}
+];
+
+// dados serão carregados do Supabase
+
+let filter='todos',expanded=null,editingId=null;
+
+function calcTotals(v){
+  let np=0,pg=0,cp=0;
+  const all=[...(v.parcelas_detail||[])];
+  if(v.valor_vista>0) all.push({valor:v.valor_vista,status:v.status_vista});
+  if(v.valor_vista2>0) all.push({valor:v.valor_vista2,status:v.status_vista2||'NÃO PAGO'});
+  all.forEach(p=>{
+    if(p.status==='NÃO PAGO') np+=p.valor;
+    else if(p.status==='PAGO') pg+=p.valor;
+    else cp+=p.valor;
+  });
+  return{np,pg,cp};
+}
+
+function filteredData(){
+  const q=(document.getElementById('search').value||'').toLowerCase();
+  return data.filter(v=>{
+    const mf=filter==='todos'||(filter==='outros'?(!v.curso||!['ALINHADORES','MENTORIA','DOP','COMBO'].includes(v.curso)):v.curso===filter);
+    return mf&&(!q||v.nome.toLowerCase().includes(q));
+  });
+}
+
+function setFilter(f,el){
+  filter=f;document.querySelectorAll('.fchip').forEach(c=>c.classList.remove('active'));el.classList.add('active');renderTable();
+}
+
+function renderMetrics(){
+  const rows=filteredData();
+  let tnp=0,tpg=0,tcp=0,tvol=0;
+  rows.forEach(v=>{const t=calcTotals(v);tnp+=t.np;tpg+=t.pg;tcp+=t.cp;tvol+=v.valor_liquido;});
+  document.getElementById('metrics').innerHTML=`
+    <div class="metric"><div class="ml">Vendas</div><div class="mv">${rows.length}</div><div class="ms">registros</div></div>
+    <div class="metric"><div class="ml">Volume total</div><div class="mv mg" style="font-size:16px">${fmt(tvol)}</div></div>
+    <div class="metric" style="border-color:var(--rbd)"><div class="ml" style="color:var(--rtx)">● Não pago</div><div class="mv mr" style="font-size:16px">${fmt(tnp)}</div><div class="ms">parcelas não recebidas</div></div>
+    <div class="metric" style="border-color:var(--abd)"><div class="ml" style="color:var(--atx)">● Comissão pendente</div><div class="mv ma" style="font-size:16px">${fmt(tpg)}</div><div class="ms">caiu, aguardando repasse</div></div>
+    <div class="metric" style="border-color:var(--gbd)"><div class="ml" style="color:var(--gtx)">● Comissão paga</div><div class="mv mgr" style="font-size:16px">${fmt(tcp)}</div><div class="ms">tudo recebido</div></div>`;
+}
+
+function renderTable(){
+  renderMetrics();
+  const rows=filteredData();
+  const tbody=document.getElementById('tbody');
+  if(!rows.length){tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:3rem;color:var(--t3)">Nenhuma venda encontrada</td></tr>';return;}
+  let html='';
+  rows.forEach(v=>{
+    const{np,pg,cp}=calcTotals(v);
+    const all=[...(v.parcelas_detail||[])];
+    if(v.valor_vista>0) all.push({valor:v.valor_vista,status:v.status_vista});
+    const nNP=all.filter(p=>p.status==='NÃO PAGO').length;
+    const nPG=all.filter(p=>p.status==='PAGO').length;
+    const nCP=all.filter(p=>p.status==='COMISSÃO PAGA').length;
+    const barSegs=all.map(p=>`<div class="ss ${p.status==='PAGO'?'ss-pg':p.status==='COMISSÃO PAGA'?'ss-cp':'ss-np'}" title="${p.status}: ${fmt(p.valor)}"></div>`).join('');
+    let barLbl='';
+    if(nCP>0) barLbl+=`<span style="color:var(--gtx)">${nCP} comissão paga</span>`;
+    if(nPG>0) barLbl+=(barLbl?' · ':'')+`<span style="color:var(--atx)">${nPG} pago</span>`;
+    if(nNP>0) barLbl+=(barLbl?' · ':'')+`<span style="color:var(--rtx)">${nNP} não pago</span>`;
+    const isExp=expanded===v.id;
+    const pgL=v.valor_vista>0?'Misto':(v.forma_pgto1||'—');
+    html+=`<tr class="dr" onclick="toggleExpand(${v.id})">
+      <td style="width:28px;text-align:center"><span class="chev${isExp?' open':''}">▾</span></td>
+      <td><div class="tdn">${v.nome}</div><div class="tdp">${v.telefone||'—'}</div></td>
+      <td><span class="badge bc">${v.curso||'—'}</span></td>
+      <td style="font-weight:600;white-space:nowrap">${fmt(v.valor_liquido)}</td>
+      <td><span class="badge bp">${pgL}${v.parcelas?' · '+v.parcelas:''}</span></td>
+      <td style="min-width:130px"><div class="sbar">${barSegs}</div><div class="sbl">${barLbl}</div></td>
+      <td style="white-space:nowrap">
+        ${pg>0?`<div style="font-size:12px;font-weight:600;color:var(--atx)">${fmt(pg)} <span style="font-size:10px;font-weight:400">a receber</span></div>`:''}
+        ${np>0?`<div style="font-size:11px;color:var(--t3)">${fmt(np)} pendente</div>`:''}
+        ${pg===0&&np===0?`<span style="font-size:12px;color:var(--gtx);font-weight:500">✓ tudo recebido</span>`:''}
+      </td>
+      <td style="font-size:12px;color:var(--t3);white-space:nowrap">${fd(v.data)}</td>
+    </tr>`;
+    if(isExp) html+=expandHTML(v);
+  });
+  tbody.innerHTML=html;
+}
+
+function expandHTML(v){
+  const{np,pg,cp}=calcTotals(v);
+  const forma=v.forma_pgto2||v.forma_pgto1||'';
+  const isAuto=AUTO_PAGO.includes(forma);
+
+  const vistaHTML=v.valor_vista>0?`<div class="vb ${vbClass(v.status_vista)}">
+    <div><div class="vlbl">${v.forma_pgto1||'À vista'} — ${fd(v.data)}</div><div class="vvv">${fmt(v.valor_vista)}</div></div>
+    <select class="vsel" onchange="updateVista(${v.id},this.value)" onclick="event.stopPropagation()">
+      ${SO.map(s=>`<option${s===v.status_vista?' selected':''}>${s}</option>`).join('')}
+    </select></div>`:'';
+  const vista2HTML=v.valor_vista2>0?`<div class="vb ${vbClass(v.status_vista2||'NÃO PAGO')}">
+    <div><div class="vlbl">${v.forma_pgto2||'Pgto 2'} — à vista · ${fd(v.data)}</div><div class="vvv">${fmt(v.valor_vista2)}</div></div>
+    <select class="vsel" onchange="updateVista2(${v.id},this.value)" onclick="event.stopPropagation()">
+      ${SO.map(s=>`<option${s===(v.status_vista2||'NÃO PAGO')?' selected':''}>${s}</option>`).join('')}
+    </select></div>`:'';
+
+  const parcHTML=(v.parcelas_detail||[]).map((p,i)=>{
+    // 1ª parcela: data = data da compra; demais = data compra + i meses
+    const dp=v.data?dataParcela(v.data,i):null;
+    const dtStr=dp?fmtData(dp):'—';
+    const autoTag=(isAuto&&i===0)?'<span style="font-size:9px;opacity:.6"> 1ª</span>':(isAuto&&dp&&dp<=hoje()&&p.status!=='COMISSÃO PAGA')?'<span style="font-size:9px;opacity:.6"> auto</span>':'';
+    return `<div class="${piClass(p.status)} pi">
+      <div class="pnum">${i+1}ª parcela${autoTag}</div>
+      <div class="pdt">📅 ${dtStr}</div>
+      <div class="pval">${fmt(p.valor)}</div>
+      <select class="psel" onchange="updateParcela(${v.id},${i},this.value)" onclick="event.stopPropagation()">
+        ${SO.map(s=>`<option${s===p.status?' selected':''}>${s}</option>`).join('')}
+      </select>
+    </div>`;
+  }).join('');
+
+  return `<tr class="er" onclick="event.stopPropagation()"><td colspan="8">
+    <div class="ei">
+      <div>
+        <div class="sl">Resumo desta venda</div>
+        <div class="ssbox">
+          <div class="sb sb-np"><div class="sbv">${fmt(np)}</div><div class="sbl2">Não pago</div><div class="sbsub">não caiu ainda</div></div>
+          <div class="sb sb-pg"><div class="sbv">${fmt(pg)}</div><div class="sbl2">Pago</div><div class="sbsub">comissão pendente</div></div>
+          <div class="sb sb-cp"><div class="sbv">${fmt(cp)}</div><div class="sbl2">Comissão paga</div><div class="sbsub">tudo recebido</div></div>
+        </div>
+        <div class="eb">
+          <div class="ebr"><span class="ebl">Valor líquido total</span><span class="ebv">${fmt(v.valor_liquido)}</span></div>
+          ${v.valor_vista>0?`<div class="ebr"><span class="ebl">À vista</span><span class="ebv">${fmt(v.valor_vista)}</span></div>`:''}
+          ${v.valor_parcelado>0&&v.valor_vista>0?`<div class="ebr"><span class="ebl">Parcelado</span><span class="ebv">${fmt(v.valor_parcelado)}</span></div>`:''}
+          <div class="ebr" style="border-top:2px solid var(--bds);margin-top:4px;padding-top:6px">
+            <span class="ebl" style="font-weight:600">Comissão a receber</span>
+            <span class="ebv" style="color:${pg>0?'var(--atx)':'var(--gtx)'};font-weight:600">${fmt(pg)}</span>
+          </div>
+        </div>
+        ${isAuto?`<div style="font-size:11px;color:var(--t3);margin-top:8px;padding:6px 10px;background:var(--s1);border-radius:var(--r);border:1px solid var(--bd)">⚡ 1ª parcela sempre paga · demais marcadas automaticamente conforme vencimento</div>`:''}
+        ${v.justificativa?`<div class="obs"><strong style="font-size:11px;color:var(--t3)">Obs.:</strong> ${v.justificativa}</div>`:''}
+        <div class="ra">
+          <button class="be" onclick="editVenda(${v.id});event.stopPropagation()">✎ Editar</button>
+          <button class="bdel" onclick="deleteVenda(${v.id});event.stopPropagation()">✕ Excluir</button>
+        </div>
+      </div>
+      <div>
+        <div class="sl">Parcelas${v.parcelas?' ('+v.parcelas+')':''}</div>
+        ${vistaHTML}
+        ${vista2HTML}
+        <div class="pg2">${parcHTML}</div>
+      </div>
+    </div>
+  </td></tr>`;
+}
+
+function toggleExpand(id){expanded=expanded===id?null:id;renderTable();}
+function updateParcela(vid,idx,s){
+  const v=data.find(x=>x.id===vid);
+  if(v){v.parcelas_detail[idx].status=s;renderTable();salvarVenda(v).catch(function(e){console.error('Erro:',e);});}
+}
+function updateVista(vid,s){
+  const v=data.find(x=>x.id===vid);
+  if(v){v.status_vista=s;renderTable();salvarVenda(v).catch(function(e){console.error('Erro:',e);});}
+}
+function updateVista2(vid,s){
+  const v=data.find(x=>x.id===vid);
+  if(v){v.status_vista2=s;renderTable();salvarVenda(v).catch(function(e){console.error('Erro:',e);});}
+}
+
+// ─── RELATÓRIO ───────────────────────────────────
+function abrirRelatorio(){
+  const COMISSAO_PCT=0.03;
+  const hoje_str=new Date().toLocaleDateString('pt-BR');
+  let totalVol=0,totalNP=0,totalPG=0,totalCP=0,nVendas=data.length;
+  data.forEach(v=>{
+    const t=calcTotals(v);
+    totalVol+=v.valor_liquido;
+    totalNP+=t.np;totalPG+=t.pg;totalCP+=t.cp;
+  });
+  const comissaoPendente=totalPG*COMISSAO_PCT;
+  const comissaoRecebida=totalCP*COMISSAO_PCT;
+  const comissaoAVencer=totalNP*COMISSAO_PCT;
+  const totalComissao=totalVol*COMISSAO_PCT;
+
+  function linha(lbl,val,cor,sub){
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--bd)">
+      <div>
+        <div style="font-size:13px;font-weight:500;color:var(--t1)">${lbl}</div>
+        ${sub?`<div style="font-size:11px;color:var(--t3);margin-top:2px">${sub}</div>`:''}
+      </div>
+      <div style="font-size:15px;font-weight:600;color:${cor}">${fmt(val)}</div>
+    </div>`;
+  }
+
+  document.getElementById('rel-body').innerHTML=`
+    <p style="font-size:12px;color:var(--t3);margin-bottom:1.25rem">Gerado em ${hoje_str} · ${nVendas} vendas · comissão de 3%</p>
+
+    <div style="background:var(--s0);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;margin-bottom:1.25rem">
+      <div style="background:var(--s1);padding:8px 16px;font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.05em">Volume de vendas</div>
+      ${linha('Volume total vendido',totalVol,'var(--t1)',nVendas+' vendas cadastradas')}
+      ${linha('Parcelas não pagas ainda',totalNP,'var(--rtx)','aguardando cair na conta')}
+      ${linha('Pago — comissão pendente',totalPG,'var(--atx)','caiu na conta, repasse não feito')}
+      ${linha('Comissão já paga',totalCP,'var(--gtx)','totalmente quitado')}
+    </div>
+
+    <div style="background:var(--s0);border:1px solid var(--gbd);border-radius:var(--r);overflow:hidden;margin-bottom:1.25rem">
+      <div style="background:var(--gbg);padding:8px 16px;font-size:11px;font-weight:600;color:var(--gtx);text-transform:uppercase;letter-spacing:.05em">Comissões — 3% sobre cada valor</div>
+      ${linha('Comissão já recebida',comissaoRecebida,'var(--gtx)','3% de '+fmt(totalCP))}
+      ${linha('Comissão a receber agora',comissaoPendente,'var(--atx)','3% de '+fmt(totalPG)+' — parcelas pagas aguardando repasse')}
+      ${linha('Comissão futura (parcelas não pagas)',comissaoAVencer,'var(--rtx)','3% de '+fmt(totalNP)+' — ainda vai cair')}
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:var(--gbg)">
+        <div style="font-size:14px;font-weight:600;color:var(--gtx)">Total de comissão da carteira</div>
+        <div style="font-size:18px;font-weight:600;color:var(--gtx)">${fmt(totalComissao)}</div>
+      </div>
+    </div>
+
+    <div style="background:var(--abg);border:1px solid var(--abd);border-radius:var(--r);padding:14px 16px;display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-size:13px;font-weight:600;color:var(--atx)">Pagar agora</div>
+        <div style="font-size:11px;color:var(--atx);opacity:.8;margin-top:2px">comissão sobre parcelas já recebidas</div>
+      </div>
+      <div style="font-size:22px;font-weight:600;color:var(--atx)">${fmt(comissaoPendente)}</div>
+    </div>
+  `;
+  document.getElementById('modal-rel').style.display='flex';
+}
+
+function fecharRelatorio(){document.getElementById('modal-rel').style.display='none';}
+function closeRelOverlay(e){if(e.target===document.getElementById('modal-rel'))fecharRelatorio();}
+
+function exportRelPDF(){
+  const COMISSAO_PCT=0.03;
+  let totalVol=0,totalNP=0,totalPG=0,totalCP=0;
+  data.forEach(v=>{const t=calcTotals(v);totalVol+=v.valor_liquido;totalNP+=t.np;totalPG+=t.pg;totalCP+=t.cp;});
+  const hoje_str=new Date().toLocaleDateString('pt-BR');
+  const comissaoPendente=totalPG*COMISSAO_PCT;
+  const comissaoRecebida=totalCP*COMISSAO_PCT;
+  const comissaoAVencer=totalNP*COMISSAO_PCT;
+  const totalComissao=totalVol*COMISSAO_PCT;
+  const fmtR=v=>'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+  const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+  <title>Relatório de Comissões — Tabela de vendas Douglas</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Helvetica Neue',Arial,sans-serif;background:#fff;color:#1a1a18;padding:40px;max-width:700px;margin:0 auto}
+    .header{display:flex;align-items:center;gap:14px;margin-bottom:28px;padding-bottom:20px;border-bottom:2px solid #E5E3DC}
+    .logo{width:44px;height:44px;background:#0B1628;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#C9A84C;font-size:14px;font-weight:700;letter-spacing:.5px;flex-shrink:0}
+    .htitle{font-size:20px;font-weight:700;color:#0B1628}
+    .hsub{font-size:13px;color:#888780;margin-top:3px}
+    .section{margin-bottom:20px}
+    .sec-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding:7px 14px;margin-bottom:0}
+    .sec-label-vol{background:#F8F7F4;color:#888780;border:1px solid #E5E3DC;border-radius:7px 7px 0 0}
+    .sec-label-com{background:#E4F5EE;color:#085041;border:1px solid #1D9E75;border-radius:7px 7px 0 0}
+    .sec-body{border:1px solid #E5E3DC;border-top:none;border-radius:0 0 7px 7px;overflow:hidden}
+    .sec-body-com{border-color:#1D9E75}
+    .row{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;border-bottom:1px solid #F0EEE9}
+    .row:last-child{border-bottom:none}
+    .rlbl{font-size:13px;font-weight:500;color:#1a1a18}
+    .rsub{font-size:11px;color:#888780;margin-top:2px}
+    .rval{font-size:14px;font-weight:700}
+    .val-red{color:#7A1F1F}.val-amber{color:#7A4F00}.val-green{color:#085041}.val-dark{color:#1a1a18}
+    .pagar{background:#FEF3DC;border:1px solid #D4940A;border-radius:8px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;margin-top:20px}
+    .pagar-lbl{font-size:14px;font-weight:700;color:#7A4F00}
+    .pagar-sub{font-size:11px;color:#7A4F00;opacity:.75;margin-top:3px}
+    .pagar-val{font-size:24px;font-weight:700;color:#7A4F00}
+    .footer{margin-top:28px;padding-top:16px;border-top:1px solid #E5E3DC;font-size:11px;color:#888780;display:flex;justify-content:space-between}
+    @media print{body{padding:24px}@page{size:A4;margin:20mm 18mm}}
+  </style></head><body>
+  <div class="header">
+    <div class="logo">NX</div>
+    <div><div class="htitle">Relatório de comissões</div><div class="hsub">Tabela de vendas Douglas · Gerado em ${hoje_str}</div></div>
+  </div>
+
+  <div class="section">
+    <div class="sec-label sec-label-vol">Volume de vendas · ${data.length} registros</div>
+    <div class="sec-body">
+      <div class="row"><div><div class="rlbl">Volume total vendido</div><div class="rsub">${data.length} vendas cadastradas</div></div><div class="rval val-dark">${fmtR(totalVol)}</div></div>
+      <div class="row"><div><div class="rlbl">Parcelas não pagas ainda</div><div class="rsub">aguardando cair na conta</div></div><div class="rval val-red">${fmtR(totalNP)}</div></div>
+      <div class="row"><div><div class="rlbl">Pago — comissão pendente</div><div class="rsub">caiu na conta, repasse não feito</div></div><div class="rval val-amber">${fmtR(totalPG)}</div></div>
+      <div class="row"><div><div class="rlbl">Comissão já paga</div><div class="rsub">totalmente quitado</div></div><div class="rval val-green">${fmtR(totalCP)}</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="sec-label sec-label-com">Comissões — 3% sobre cada valor</div>
+    <div class="sec-body sec-body-com">
+      <div class="row"><div><div class="rlbl">Comissão já recebida</div><div class="rsub">3% de ${fmtR(totalCP)}</div></div><div class="rval val-green">${fmtR(comissaoRecebida)}</div></div>
+      <div class="row"><div><div class="rlbl">Comissão a receber agora</div><div class="rsub">3% de ${fmtR(totalPG)} — parcelas pagas aguardando repasse</div></div><div class="rval val-amber">${fmtR(comissaoPendente)}</div></div>
+      <div class="row"><div><div class="rlbl">Comissão futura (parcelas não pagas)</div><div class="rsub">3% de ${fmtR(totalNP)} — ainda vai cair</div></div><div class="rval val-red">${fmtR(comissaoAVencer)}</div></div>
+      <div class="row" style="background:#E4F5EE"><div><div class="rlbl" style="color:#085041;font-size:14px">Total de comissão da carteira</div></div><div class="rval val-green" style="font-size:18px">${fmtR(totalComissao)}</div></div>
+    </div>
+  </div>
+
+  <div class="pagar">
+    <div><div class="pagar-lbl">Pagar agora</div><div class="pagar-sub">comissão sobre parcelas já recebidas</div></div>
+    <div class="pagar-val">${fmtR(comissaoPendente)}</div>
+  </div>
+
+  <div class="footer"><span>Tabela de vendas Douglas</span><span>${hoje_str}</span></div>
+  <script>window.onload=()=>window.print();<\/script>
+  </body></html>`;
+
+  const w=window.open('','_blank');
+  w.document.write(html);
+  w.document.close();
+}
+
+function openModal(){
+  editingId=null;
+  document.getElementById('modal-title').textContent='Nova venda';
+  ['f-nome','f-tel','f-just','f-valor','f-valor-vista'].forEach(id=>document.getElementById(id).value='');
+  ['f-curso','f-forma1','f-forma2','f-parcelas'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-data').value=new Date().toISOString().split('T')[0];
+  document.getElementById('modal').style.display='flex';
+}
+
+function editVenda(id){
+  const v=data.find(x=>x.id===id);if(!v)return;
+  editingId=id;
+  document.getElementById('modal-title').textContent='Editar venda';
+  document.getElementById('f-nome').value=v.nome;
+  document.getElementById('f-tel').value=v.telefone||'';
+  document.getElementById('f-curso').value=v.curso||'';
+  document.getElementById('f-data').value=v.data||'';
+  document.getElementById('f-valor').value=v.valor_liquido;
+  document.getElementById('f-just').value=v.justificativa||'';
+  document.getElementById('f-forma1').value=v.forma_pgto1||'';
+  document.getElementById('f-valor-vista').value=v.valor_vista||'';
+  document.getElementById('f-forma2').value=v.forma_pgto2||'';
+  document.getElementById('f-parcelas').value=v.parcelas||'';
+  document.getElementById('modal').style.display='flex';
+}
+
+function saveVenda(){
+  const nome=document.getElementById('f-nome').value.trim();
+  const valor=parseFloat(document.getElementById('f-valor').value)||0;
+  if(!nome||!valor){alert('Nome e valor são obrigatórios.');return;}
+  const parcStr=document.getElementById('f-parcelas').value;
+  const nParc=parcStr?parseInt(parcStr):0;
+  const vistaVal=parseFloat(document.getElementById('f-valor-vista').value)||0;
+  const forma1=document.getElementById('f-forma1').value;
+  const forma2=document.getElementById('f-forma2').value;
+  const dataVal=document.getElementById('f-data').value;
+  const parcelado=Math.max(0,valor-vistaVal);
+  const parcVal=nParc>0?parcelado/nParc:0;
+  const formaParc=forma2||'';
+  // Se forma2 é à vista (não parcelado), tratar como pagamento à vista
+  const FORMA2_VISTA=['Cartão débito','Boleto','Pix à vista','Transferência','Dinheiro'];
+  const forma2IsVista=FORMA2_VISTA.includes(forma2)&&!parcStr;
+
+  const parcDet=nParc>0&&!forma2IsVista?Array.from({length:nParc},(_,i)=>{
+    let st='NÃO PAGO';
+    if(AUTO_PAGO.includes(formaParc)&&dataVal){
+      if(i===0) st='PAGO';
+      else{const dp=dataParcela(dataVal,i);if(dp<=hoje()) st='PAGO';}
+    }
+    return{valor:Math.round(parcVal*100)/100,status:st};
+  }):[];
+
+  // à vista: débito/boleto/pix à vista → PAGO imediato
+  let svista='NÃO PAGO';
+  if(vistaVal>0&&VISTA_PAGO.includes(forma1)) svista='PAGO';
+
+  // forma2 à vista sem parcelamento: adiciona como segundo pagamento à vista já PAGO
+  // Guardamos como campo extra valor_vista2 e status_vista2
+  const vista2Val=forma2IsVista?parcelado:0;
+  const svista2=forma2IsVista?'PAGO':'NÃO PAGO';
+
+  if(editingId){
+    const idx=data.findIndex(x=>x.id===editingId);
+    if(idx>-1){
+      const keep=data[idx].parcelas_detail.length===parcDet.length;
+      data[idx]={...data[idx],nome,telefone:document.getElementById('f-tel').value,curso:document.getElementById('f-curso').value,data:dataVal,valor_liquido:valor,justificativa:document.getElementById('f-just').value,forma_pgto1:forma1,valor_vista:vistaVal,status_vista:keep?data[idx].status_vista:svista,forma_pgto2:forma2,valor_parcelado:parcelado,parcelas:parcStr,parcelas_detail:keep?data[idx].parcelas_detail:parcDet,valor_vista2:vista2Val,status_vista2:svista2};
+      aplicaAutoStatus(data[idx]);
+    }
+  } else {
+    const newId=Math.max(0,...data.map(x=>x.id))+1;
+    const nov={id:newId,data:dataVal,nome,telefone:document.getElementById('f-tel').value,curso:document.getElementById('f-curso').value,valor_liquido:valor,justificativa:document.getElementById('f-just').value,forma_pgto1:forma1,valor_vista:vistaVal,status_vista:svista,forma_pgto2:forma2,valor_parcelado:parcelado,parcelas:parcStr,parcelas_detail:parcDet,valor_vista2:vista2Val,status_vista2:svista2};
+    data.push(nov);
+    expanded=newId;
+  }
+  closeModal();
+  if(editingId){
+    const v=data.find(x=>x.id===editingId);
+    if(v) salvarVenda(v).catch(function(e){console.error('Erro ao salvar:',e);});
+    renderTable();
+  }else{
+    const nov=data[data.length-1];
+    nov._isNew=true;
+    renderTable();
+    salvarVenda(nov).then(function(newId){nov.id=newId;nov._isNew=undefined;renderTable();}).catch(function(e){console.error('Erro ao criar:',e);});
+  }
+}
+
+function deleteVenda(id){
+  if(!confirm('Excluir esta venda?'))return;
+  apagarVenda(id).then(function(){
+    data=data.filter(x=>x.id!==id);if(expanded===id)expanded=null;renderTable();
+  }).catch(function(e){console.error('Erro ao excluir:',e);});
+}
+
+function exportCSV(){
+  const rows=[['Nome','Telefone','Curso','Data','Valor Líquido','Forma Pgto 1','Valor Vista','Status Vista','Forma Pgto 2','Parcelas','Não Pago','Pago (comissão pendente)','Comissão Paga']];
+  data.forEach(v=>{
+    const t=calcTotals(v);
+    rows.push([v.nome,v.telefone||'',v.curso||'',v.data||'',v.valor_liquido.toFixed(2),v.forma_pgto1||'',v.valor_vista.toFixed(2),v.status_vista,v.forma_pgto2||'',v.parcelas||'',t.np.toFixed(2),t.pg.toFixed(2),t.cp.toFixed(2)]);
+  });
+  const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
+  a.download='nexus_vendas.csv';a.click();
+}
+
+function closeModal(){document.getElementById('modal').style.display='none';}
+function closeModalOverlay(e){if(e.target===document.getElementById('modal'))closeModal();}
+
+carregarDados();
+</script>
+</body>
+</html>
